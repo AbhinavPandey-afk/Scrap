@@ -3,37 +3,43 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import urljoin
 import time
 
-def find_presentation_pdf(base_url, keywords=("presentation",)):
-    # Setup Chrome options
+def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
     options = Options()
-    options.add_argument("--headless")  # Run in headless mode if desired
+    options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
 
     try:
-        print(f"Opening: {base_url}")
+        print(f"🌐 Opening: {base_url}")
         driver.get(base_url)
-        driver.implicitly_wait(10)
 
-        # Find all links to PDFs
-        pdf_links = driver.find_elements(By.XPATH, "//a[contains(@href, '.pdf')]")
+        # Optional: Wait for the page to load (customize if you know dynamic loading is needed)
+        time.sleep(5)  # You can adjust this delay based on page complexity
+
+        # Find all <a> tags with href ending with .pdf
+        pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
+        print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
 
         for link in pdf_links:
-            text = link.text.lower()
             href = link.get_attribute("href")
-            # Check if the link text or nearby context matches keywords
-            if any(keyword in text for keyword in keywords):
-                full_link = urljoin(base_url, href)
-                # print("✅ Found matching presentation PDF:", full_link)
-                return full_link
+            link_text = link.text.strip().lower()
+            if href:
+                # Match keywords in href or link text
+                if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
+                    full_link = urljoin(base_url, href)
+                    # print("✅ Found matching PDF:", full_link)
+                    return full_link
 
-        # print("No matching presentation PDF found.")
+        # print("❌ No matching PDF found.")
         return None
 
     except Exception as e:
-        print("Error:", e)
+        # print("❌ Error:", e)
+        return None
     finally:
         driver.quit()
 
