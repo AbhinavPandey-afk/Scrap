@@ -4,7 +4,7 @@ warnings.filterwarnings('ignore')
 
 row = []
 investor_url = input("Enter Investor Site Link:")
-keywords = ("presentation", "earnings", "q1", "results")  # Add more if needed
+keywords = ("presentation", "earnings", "results")  # Add more if needed
 pdf_link = find_presentation_pdf(investor_url, keywords)
 # row.append(pdf_link)
 if pdf_link:
@@ -21,7 +21,7 @@ if pdf_link:
             "Which quarter is the data of ? Return in this form only - e.g. 1Q 2052  no extra information needed",
             "What is the total revenue reported? Provide exact value only in the form - e.g. $ 1.0 Billion",
             "What is the net income reported? Provide exact value only in the form - e.g. $ 1.0 Billion",
-            "What is the date of publishment of these results? Return in this form only - DD/MM/YYYY format no extra information needed."
+            "What is the date of publishment of this pdf or the conference? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
 
         for query in queries:
