@@ -14,7 +14,7 @@ def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
     driver = webdriver.Chrome(options=options)
 
     try:
-        print(f"🌐 Opening: {base_url}")
+        print(f"Opening: {base_url}")
         driver.get(base_url)
 
         # Optional: Wait for the page to load (customize if you know dynamic loading is needed)

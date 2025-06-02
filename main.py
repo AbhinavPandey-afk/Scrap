@@ -6,7 +6,7 @@ row = []
 investor_url = input("Enter Investor Site Link:")
 keywords = ("presentation", "earnings", "q1", "results")  # Add more if needed
 pdf_link = find_presentation_pdf(investor_url, keywords)
-row.append(pdf_link)
+# row.append(pdf_link)
 if pdf_link:
     print("📄 PDF Link:", pdf_link)
     pdf_url = pdf_link  # Replace with actual URL
@@ -18,8 +18,10 @@ if pdf_link:
         # Run financial queries
         queries = [
             "What is the name of the bank? Provide only the name no extra information.",
-            "What is the total revenue reported? Provide exact value only in the form - e.g. 1.0 Billion",
-            "What is the net income reported? Provide exact value only in the form - e.g. 1.0 Billion",
+            "Which quarter is the data of ? Return in this form only - e.g. 1Q 2052  no extra information needed",
+            "What is the total revenue reported? Provide exact value only in the form - e.g. $ 1.0 Billion",
+            "What is the net income reported? Provide exact value only in the form - e.g. $ 1.0 Billion",
+            "What is the date of publishment of these results? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
 
         for query in queries:
