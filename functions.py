@@ -23,7 +23,7 @@ def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
         # Find all <a> tags with href ending with .pdf
         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
         print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
-
+        l=[]
         for link in pdf_links:
             href = link.get_attribute("href")
             link_text = link.text.strip().lower()
@@ -31,14 +31,15 @@ def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
                 # Match keywords in href or link text
                 if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
                     full_link = urljoin(base_url, href)
+                    l.append(full_link)
                     # print("✅ Found matching PDF:", full_link)
-                    return full_link
+                    # return full_link
 
         # print("❌ No matching PDF found.")
-        return None
+        return l
 
     except Exception as e:
-        # print("❌ Error:", e)
+        print("❌ Error:", e)
         return None
     finally:
         driver.quit()
@@ -83,11 +84,12 @@ def delete_file(file_path):
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
         "model": "deepseek/deepseek-r1-0528:free",
+        # "model":"meta-llama/llama-3.3-8b-instruct:free",
         "messages": [
             {"role": "system", "content": "You are a financial analyst extracting precise numerical data."},
             {"role": "user", "content": f"Context: {context}\n\nQuestion: {prompt}"}
