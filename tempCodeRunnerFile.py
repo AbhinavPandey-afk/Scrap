@@ -1,35 +1,4 @@
-from functions import *
-import warnings
-warnings.filterwarnings('ignore')
-
-bank_input = input("Enter Bank Name: ")
-investor_url = find_investor_url(bank_input)
-
-if not investor_url:
-    print("Investor site not found. Exiting.")
-    exit()
-
-quarter = int(input("Enter 1/2/3/4: "))
-year = int(input("Enter year: "))
-
-# Derive previous quarter and last year same quarter
-prev_q = 4 if quarter == 1 else quarter - 1
-prev_y = year if quarter > 1 else year - 1
-last_y_same_q = year - 1
-
-keywords = ("presentation", "earnings", "results", str(year), str(prev_y))
-pdf_links = find_presentation_pdf(investor_url, keywords)
-
-context = ""
-for pdf_link in pdf_links:
-    try:
-        downloaded_path = download_pdf(pdf_link)
-        context += "\n" + load_and_prepare_pdf(downloaded_path)
-    finally:
-        delete_file("presentation.pdf")
-
-# Define all queries
-# queries = [
+queries = [
 #     "What is the name of the bank? Provide only the name no extra information.",
 
 #     f"What is the total revenue reported for quarter {quarter} in year {year}?, Provide Exact values only and no other information. If no exact value found just give output as NULL dont give anything else.",
