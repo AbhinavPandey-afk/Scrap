@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bank Report Extractor</title>
+  </head>
+  <body>
+    <h2>Bank Financial Report Extractor</h2>
+    <form method="post">
+      <label>Bank Name:</label><br />
+      <input type="text" name="bank" required /><br /><br />
+      <label>Quarter (1-4):</label><br />
+      <input
+        type="number"
+        name="quarter"
+        min="1"
+        max="4"
+        required
+      /><br /><br />
+      <label>Year:</label><br />
+      <input type="number" name="year" required /><br /><br />
+      <input type="submit" value="Generate CSV" />
+    </form>
+  </body>
+</html>
