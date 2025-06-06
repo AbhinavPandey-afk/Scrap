@@ -1,65 +1,67 @@
+
 from functions import *
 import warnings
 warnings.filterwarnings('ignore')
 
+row = []
 bank_input = input("Enter Bank Name: ")
 investor_url = find_investor_url(bank_input)
 
 if not investor_url:
     print("Investor site not found. Exiting.")
     exit()
-
 quarter = int(input("Enter 1/2/3/4: "))
 year = int(input("Enter year: "))
 
-# Derive previous quarter and last year same quarter
-prev_q = 4 if quarter == 1 else quarter - 1
-prev_y = year if quarter > 1 else year - 1
-last_y_same_q = year - 1
+prev_q=quarter-1
+prev_y=year
+if prev_q==0:
+    prev_q=4
+    prev_y=year-1
 
-keywords = ("presentation", "earnings", "results", str(year), str(prev_y))
+
+keywords = ("presentation", "earnings", "results",str(year),str(prev_y))  # Add more if needed
 pdf_links = find_presentation_pdf(investor_url, keywords)
-
-context = ""
-for pdf_link in pdf_links:
+context=""
+# row.append(pdf_link)
+for pdf_link in  pdf_links:
+    # print("📄 PDF Link:", pdf_link)
+    pdf_url = pdf_link  # Replace with actual URL
+    local_path = "presentation.pdf"
     try:
-        downloaded_path = download_pdf(pdf_link)
-        context += "\n" + load_and_prepare_pdf(downloaded_path)
+        downloaded_path = download_pdf(pdf_url, local_path)
+        context += "/n"+load_and_prepare_pdf(downloaded_path)
     finally:
-        delete_file("presentation.pdf")
+        delete_file(local_path)  # Always clean up the file
+# print(context)
+queries = [
+            "What is the name of the bank? Provide only the name no extra information.",
 
-# Define all queries
-# queries = [
-#     "What is the name of the bank? Provide only the name no extra information.",
+            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the net income reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the date of publishment of conference of quarter {quarter} in year {year} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-#     f"What is the total revenue reported for quarter {quarter} in year {year}?, Provide Exact values only and no other information. If no exact value found just give output as NULL dont give anything else.",
-#     f"What is the net income reported for quarter {quarter} in year {year}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
-#     f"What is the date of publishment of conference of quarter {quarter} in year {year}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
+            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the net income reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-#     f"What is the total revenue reported for quarter {prev_q} in year {prev_y}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
-#     f"What is the net income reported for quarter {prev_q} in year {prev_y}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
-#     f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
+            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the net income reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
+        ]
 
-#     f"What is the total revenue reported for quarter {quarter} in year {last_y_same_q}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
-#     f"What is the net income reported for quarter {quarter} in year {last_y_same_q}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else.",
-#     f"What is the date of publishment of conference of quarter {quarter} in year {last_y_same_q}?, Provide Exact values only and no other information.If no exact value found just give output as NULL dont give anything else."
-# ]
+for query in queries:
+    response = query_deepseek(query, context)
+    # print(response)
+    answer = response['choices'][0]['message']['content']
+    row.append(answer)
+    print(f"Q: {query}\nA: {answer}\n")
 
-# # Ask queries and collect answers
-# answers = []
-# for query in queries:
-#     response = query_deepseek(query, context)
-#     answer = response['choices'][0]['message']['content']
-#     answers.append(answer)
-#     print(f"Q: {query}\nA: {answer}\n")
 
-# # Extract rows
-# bank_name = answers[0]
 
-# row1 = [bank_name, f"{quarter}Q{str(year)[-2:]}", answers[1], answers[2], answers[3]]
-# row2 = [bank_name, f"{prev_q}Q{str(prev_y)[-2:]}", answers[4], answers[5], answers[6]]
-# row3 = [bank_name, f"{quarter}Q{str(last_y_same_q)[-2:]}", answers[7], answers[8], answers[9]]
+# Appending data in the file
+# import csv 
 
-# # Insert into MySQL
-# insert_three_rows([row1, row2, row3])
-# print("✅ Data inserted into MySQL.")
+# with open('data.csv', 'a', newline='') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(row)
