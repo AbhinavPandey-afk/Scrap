@@ -60,8 +60,8 @@ for query in queries:
 
 
 # Appending data in the file
-# import csv 
+import csv 
 
-# with open('data.csv', 'a', newline='') as file:
-#     writer = csv.writer(file)
-#     writer.writerow(row)
+with open('data.csv', 'a', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(row)
