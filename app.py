@@ -38,29 +38,37 @@ def index():
 
         queries = [
             "What is the name of the bank? Provide only the name no extra information.",
-            f"What is the total revenue reported for quarter {quarter} in year {year}?",
-            f"What is the net income reported for quarter {quarter} in year {year}?",
-            f"What is the date of publishment of conference of quarter {quarter} in year {year}?",
-            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}?",
-            f"What is the net income reported for quarter {prev_q} in year {prev_y}?",
-            f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y}?",
-            f"What is the total revenue reported for quarter {quarter} in year {year-1}?",
-            f"What is the net income reported for quarter {quarter} in year {year-1}?",
-            f"What is the date of publishment of conference of quarter {quarter} in year {year-1}?"
+
+            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the net income reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the date of publishment of conference of quarter {quarter} in year {year} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
+
+            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the net income reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
+
+            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the net income reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
 
         row = []
+        answers=[]
         for query in queries:
             response = query_deepseek(query, context)
-            print(response)
+            # print(response)
             answer = response['choices'][0]['message']['content']
-            row.append(answer)
+            # row.append(answer)
+            answers.append(answer)
 
         csv_path = 'output/data.csv'
         os.makedirs('output', exist_ok=True)
-        with open(csv_path, 'a', newline='') as f:
+        with open(csv_path, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(row)
+            writer.writerow(["Name","Quater","Year","Revenue","Net Income","Date"])
+            writer.writerow([answers[0],quarter,year,answers[1],answers[2],answers[3]])
+            writer.writerow([answers[0],prev_q,prev_y,answers[4],answers[5],answers[6]])
+            writer.writerow([answers[0],quarter,year-1,answers[7],answers[8],answers[9]])
 
         return send_file(csv_path, as_attachment=True)
 
