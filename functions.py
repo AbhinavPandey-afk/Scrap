@@ -5,11 +5,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import urljoin
 import time
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+
 
 def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Chrome(options=options)
+    
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
     try:
         print(f"Opening: {base_url}")

@@ -1,5 +1,5 @@
 selenium
-selenium webdriver-manager
+webdriver-manager
 requests
 beautifulsoup4
 urllib3
