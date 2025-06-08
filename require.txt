@@ -6,3 +6,4 @@ langchain
 langchain-community
 tqdm
 gunicorn
+flask
