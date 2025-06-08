@@ -5,3 +5,4 @@ urllib3
 langchain
 langchain-community
 tqdm
+gunicorn
