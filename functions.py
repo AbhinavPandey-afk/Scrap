@@ -10,42 +10,77 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 
 
-def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
-    options = Options()
-    options.add_argument("--headless")
+# def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
+#     options = Options()
+#     options.add_argument('--headless')
+#     options.add_argument('--no-sandbox')
+#     options.add_argument('--disable-dev-shm-usage') 
     
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+#     service = Service(ChromeDriverManager().install())
+#     driver = webdriver.Chrome(service=service, options=options)
 
+#     try:
+#         print(f"Opening: {base_url}")
+#         driver.get(base_url)
+
+#         # Optional: Wait for the page to load (customize if you know dynamic loading is needed)
+#         time.sleep(5)  # You can adjust this delay based on page complexity
+
+#         # Find all <a> tags with href ending with .pdf
+#         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
+#         print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
+#         l=[]
+#         for link in pdf_links:
+#             href = link.get_attribute("href")
+#             link_text = link.text.strip().lower()
+#             if href:
+#                 # Match keywords in href or link text
+#                 if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
+#                     full_link = urljoin(base_url, href)
+#                     l.append(full_link)
+#                     # print("✅ Found matching PDF:", full_link)
+#                     # return full_link
+
+#         # print("❌ No matching PDF found.")
+#         return l
+
+#     except Exception as e:
+#         print("❌ Error:", e)
+#         return None
+#     finally:
+#         driver.quit()
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+
+def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
     try:
-        print(f"Opening: {base_url}")
-        driver.get(base_url)
+        print(f"Fetching page: {base_url}")
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(base_url, headers=headers, timeout=timeout)
+        response.raise_for_status()
 
-        # Optional: Wait for the page to load (customize if you know dynamic loading is needed)
-        time.sleep(5)  # You can adjust this delay based on page complexity
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Find all <a> tags with href ending with .pdf
-        pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
-        print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
-        l=[]
-        for link in pdf_links:
-            href = link.get_attribute("href")
-            link_text = link.text.strip().lower()
-            if href:
-                # Match keywords in href or link text
-                if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
-                    full_link = urljoin(base_url, href)
-                    l.append(full_link)
-                    # print("✅ Found matching PDF:", full_link)
-                    # return full_link
+        pdf_links = []
+        # Find all <a> tags with href containing ".pdf" (case-insensitive)
+        for link in soup.find_all('a', href=True):
+            href = link['href'].lower()
+            if '.pdf' in href:
+                full_link = urljoin(base_url, link['href'])
+                text = link.get_text(strip=True).lower()
 
-        # print("❌ No matching PDF found.")
-        return l
+                # Check keywords in href or link text
+                if any(kw.lower() in href or kw.lower() in text for kw in keywords):
+                    pdf_links.append(full_link)
+
+        print(f"🔍 Found {len(pdf_links)} matching PDF links.")
+        return pdf_links
 
     except Exception as e:
-        print("❌ Error:", e)
+        print(f"❌ Error fetching or parsing page: {e}")
         return None
-    finally:
-        driver.quit()
+
 
 
 ''' Function to convert link to text and get Revenue'''
@@ -57,15 +92,27 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # Download PDF
-def download_pdf(pdf_url, save_path="presentation.pdf"):
+# def download_pdf(pdf_url, save_path="presentation.pdf"):
+#     response = requests.get(pdf_url)
+#     if response.status_code == 200:
+#         with open(save_path, "wb") as f:
+#             f.write(response.content)
+#         # print(f"✅ PDF downloaded to {save_path}")
+#         return save_path
+#     else:
+#         raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
+import tempfile
+
+def download_pdf(pdf_url):
     response = requests.get(pdf_url)
     if response.status_code == 200:
-        with open(save_path, "wb") as f:
-            f.write(response.content)
-        # print(f"✅ PDF downloaded to {save_path}")
-        return save_path
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+        temp_file.write(response.content)
+        temp_file.close()
+        return temp_file.name
     else:
         raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
+
 
 # Load and prepare context from PDF
 def load_and_prepare_pdf(local_pdf_path):
@@ -76,18 +123,24 @@ def load_and_prepare_pdf(local_pdf_path):
     return "\n".join([doc.page_content for doc in docs[:5]])
 
 # Delete the file
-def delete_file(file_path):
-    if os.path.exists(file_path):
-        os.remove(file_path)
+# def delete_file(file_path):
+#     if os.path.exists(file_path):
+#         os.remove(file_path)
         # print(f"🗑 Deleted file: {file_path}")
     # else:
         # print(f"⚠ File not found: {file_path}")
+def delete_file(file_path):
+    try:
+        os.remove(file_path)
+    except Exception as e:
+        print(f"⚠️ Could not delete file: {e}")
+
 
 # DeepSeek API call function
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer sk-or-v1-efaaf02f4a3ff14ca20d18ba0673c71ef5b0b07a29faa4dc4395b5a7bc6684a4a",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {

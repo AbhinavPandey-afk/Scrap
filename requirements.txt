@@ -1,4 +1,5 @@
 selenium
+pypdf
 webdriver-manager
 requests
 beautifulsoup4

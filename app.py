@@ -31,13 +31,14 @@ def index():
         for pdf_link in pdf_links:
             local_path = "presentation.pdf"
             try:
-                downloaded_path = download_pdf(pdf_link, local_path)
+                # downloaded_path = download_pdf(pdf_link, local_path)
+                downloaded_path = download_pdf(pdf_link)
                 context += "\n" + load_and_prepare_pdf(downloaded_path)
             finally:
                 delete_file(local_path)
 
         queries = [
-            "What is the name of the bank? Provide only the name no extra information.",
+            "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
 
             f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
             f"What is the net income reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
