@@ -44,8 +44,8 @@ def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
         return l
 
     except Exception as e:
-        print("❌ Error:", e)
-        return None
+        # print("❌ Error:", e)
+        return []
     finally:
         driver.quit()
 # import requests
@@ -139,7 +139,7 @@ def delete_file(file_path):
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
@@ -149,11 +149,28 @@ def query_deepseek(prompt, context):
             {"role": "system", "content": "You are a financial analyst extracting precise numerical data."},
             {"role": "user", "content": f"Context: {context}\n\nQuestion: {prompt}"}
         ],
-        "temperature": 0
+        "temperature": 0.5
     }
 
-    response = requests.post(api_url, headers=headers, json=payload)
-    return response.json()
+    # response = requests.post(api_url, headers=headers, json=payload)
+    # return response.json()
+    try:
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
+        return response.json()
+
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error occurred: {e}")
+        return {"error": str(e), "details": response.text}
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return {"error": str(e)}
+
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return {"error": str(e)}
+
 def find_investor_url(bank_name):
     import requests
     from bs4 import BeautifulSoup
@@ -166,15 +183,16 @@ def find_investor_url(bank_name):
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
     results = soup.find_all("a", attrs={"class": "result__a"}, href=True)
-
+    URLS=[]
     for link in results:
         href = link['href']
         if "uddg=" in href:
             real_url = href.split("uddg=")[-1]
             real_url = unquote(real_url.split('&')[0])
             if 'investor' in real_url.lower():
-                print(f"🔗 Found Investor URL: {real_url}")
-                return real_url
+                # print(f"🔗 Found Investor URL: {real_url}")
+                # return real_url
+                URLS.append(real_url)
 
-    print("❌ No valid investor link found.")
-    return None
+    # print("❌ No valid investor link found.")
+    return URLS

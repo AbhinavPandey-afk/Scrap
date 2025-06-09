@@ -14,8 +14,8 @@ def index():
         quarter = int(request.form['quarter'])
         year = int(request.form['year'])
 
-        investor_url = find_investor_url(bank_name)
-        if not investor_url:
+        investor_urls = find_investor_url(bank_name)
+        if len(investor_urls)==0:
             return "Investor site not found. Please try again."
 
         prev_q = quarter - 1
@@ -24,8 +24,10 @@ def index():
             prev_q = 4
             prev_y = year - 1
 
+        pdf_links=[]
         keywords = ("presentation", "earnings", "results", str(year), str(prev_y))
-        pdf_links = find_presentation_pdf(investor_url, keywords)
+        for investor_url in investor_urls:
+            pdf_links += find_presentation_pdf(investor_url, keywords)
 
         context = ""
         for pdf_link in pdf_links:
@@ -38,7 +40,7 @@ def index():
                 delete_file(local_path)
 
         queries = [
-            "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
+            # "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
 
             f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
             f"What is the net income reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
@@ -57,7 +59,8 @@ def index():
         answers=[]
         for query in queries:
             response = query_deepseek(query, context)
-            # print(response)
+            
+            print(response)
             answer = response['choices'][0]['message']['content']
             # row.append(answer)
             answers.append(answer)
@@ -86,4 +89,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
