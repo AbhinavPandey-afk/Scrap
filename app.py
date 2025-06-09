@@ -69,15 +69,15 @@ def index():
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(["Name", "Quarter", "Year", "Revenue", "Net Income", "Date"])
-                writer.writerow([answers[0], quarter, year, answers[1], answers[2], answers[3]])
-                writer.writerow([answers[0], prev_q, prev_y, answers[4], answers[5], answers[6]])
-                writer.writerow([answers[0], quarter, year - 1, answers[7], answers[8], answers[9]])
+                writer.writerow([bank_name, quarter, year, answers[1], answers[2], answers[3]])
+                writer.writerow([bank_name, prev_q, prev_y, answers[4], answers[5], answers[6]])
+                writer.writerow([bank_name, quarter, year - 1, answers[7], answers[8], answers[9]])
         else:
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow([answers[0], quarter, year, answers[1], answers[2], answers[3]])
-                writer.writerow([answers[0], prev_q, prev_y, answers[4], answers[5], answers[6]])
-                writer.writerow([answers[0], quarter, year - 1, answers[7], answers[8], answers[9]])
+                writer.writerow([bank_name, quarter, year, answers[1], answers[2], answers[3]])
+                writer.writerow([bank_name, prev_q, prev_y, answers[4], answers[5], answers[6]])
+                writer.writerow([bank_name, quarter, year - 1, answers[7], answers[8], answers[9]])
 
 
 
@@ -86,4 +86,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

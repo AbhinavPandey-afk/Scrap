@@ -9,77 +9,76 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-
-# def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
-#     options = Options()
-#     options.add_argument('--headless')
-#     options.add_argument('--no-sandbox')
-#     options.add_argument('--disable-dev-shm-usage') 
-    
-#     service = Service(ChromeDriverManager().install())
-#     driver = webdriver.Chrome(service=service, options=options)
-
-#     try:
-#         print(f"Opening: {base_url}")
-#         driver.get(base_url)
-
-#         # Optional: Wait for the page to load (customize if you know dynamic loading is needed)
-#         time.sleep(5)  # You can adjust this delay based on page complexity
-
-#         # Find all <a> tags with href ending with .pdf
-#         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
-#         print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
-#         l=[]
-#         for link in pdf_links:
-#             href = link.get_attribute("href")
-#             link_text = link.text.strip().lower()
-#             if href:
-#                 # Match keywords in href or link text
-#                 if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
-#                     full_link = urljoin(base_url, href)
-#                     l.append(full_link)
-#                     # print("✅ Found matching PDF:", full_link)
-#                     # return full_link
-
-#         # print("❌ No matching PDF found.")
-#         return l
-
-#     except Exception as e:
-#         print("❌ Error:", e)
-#         return None
-#     finally:
-#         driver.quit()
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-
 def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage') 
+    
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+
     try:
-        print(f"Fetching page: {base_url}")
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(base_url, headers=headers, timeout=timeout)
-        response.raise_for_status()
+        print(f"Opening: {base_url}")
+        driver.get(base_url)
 
-        soup = BeautifulSoup(response.text, 'html.parser')
+        # Optional: Wait for the page to load (customize if you know dynamic loading is needed)
+        time.sleep(5)  # You can adjust this delay based on page complexity
 
-        pdf_links = []
-        # Find all <a> tags with href containing ".pdf" (case-insensitive)
-        for link in soup.find_all('a', href=True):
-            href = link['href'].lower()
-            if '.pdf' in href:
-                full_link = urljoin(base_url, link['href'])
-                text = link.get_text(strip=True).lower()
+        # Find all <a> tags with href ending with .pdf
+        pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
+        print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
+        l=[]
+        for link in pdf_links:
+            href = link.get_attribute("href")
+            link_text = link.text.strip().lower()
+            if href:
+                # Match keywords in href or link text
+                if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
+                    full_link = urljoin(base_url, href)
+                    l.append(full_link)
+                    # print("✅ Found matching PDF:", full_link)
+                    # return full_link
 
-                # Check keywords in href or link text
-                if any(kw.lower() in href or kw.lower() in text for kw in keywords):
-                    pdf_links.append(full_link)
-
-        print(f"🔍 Found {len(pdf_links)} matching PDF links.")
-        return pdf_links
+        # print("❌ No matching PDF found.")
+        return l
 
     except Exception as e:
-        print(f"❌ Error fetching or parsing page: {e}")
+        print("❌ Error:", e)
         return None
+    finally:
+        driver.quit()
+# import requests
+# from bs4 import BeautifulSoup
+# from urllib.parse import urljoin
+
+# def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
+#     try:
+#         print(f"Fetching page: {base_url}")
+#         headers = {'User-Agent': 'Mozilla/5.0'}
+#         response = requests.get(base_url, headers=headers, timeout=timeout)
+#         response.raise_for_status()
+
+#         soup = BeautifulSoup(response.text, 'html.parser')
+
+#         pdf_links = []
+#         # Find all <a> tags with href containing ".pdf" (case-insensitive)
+#         for link in soup.find_all('a', href=True):
+#             href = link['href'].lower()
+#             if '.pdf' in href:
+#                 full_link = urljoin(base_url, link['href'])
+#                 text = link.get_text(strip=True).lower()
+
+#                 # Check keywords in href or link text
+#                 if any(kw.lower() in href or kw.lower() in text for kw in keywords):
+#                     pdf_links.append(full_link)
+
+#         print(f"🔍 Found {len(pdf_links)} matching PDF links.")
+#         return pdf_links
+
+#     except Exception as e:
+#         print(f"❌ Error fetching or parsing page: {e}")
+#         return None
 
 
 
@@ -140,7 +139,7 @@ def delete_file(file_path):
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer sk-or-v1-efaaf02f4a3ff14ca20d18ba0673c71ef5b0b07a29faa4dc4395b5a7bc6684a4a",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
