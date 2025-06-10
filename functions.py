@@ -9,12 +9,22 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from urllib.parse import urljoin
+# from webdriver_manager.chrome import ChromeDriverManager
+# import time
+
 def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage') 
-    
+
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
 
@@ -22,63 +32,137 @@ def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
         print(f"Opening: {base_url}")
         driver.get(base_url)
 
-        # Optional: Wait for the page to load (customize if you know dynamic loading is needed)
-        time.sleep(5)  # You can adjust this delay based on page complexity
+        # Wait up to `timeout` seconds for any anchor tag to appear
+        WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((By.TAG_NAME, "a"))
+        )
 
-        # Find all <a> tags with href ending with .pdf
+        # Give time for JS to populate hrefs if needed
+        time.sleep(3)
+
         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
         print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
-        l=[]
+
+        result_links = []
         for link in pdf_links:
             href = link.get_attribute("href")
             link_text = link.text.strip().lower()
-            if href:
-                # Match keywords in href or link text
-                if any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
-                    full_link = urljoin(base_url, href)
-                    l.append(full_link)
-                    # print("✅ Found matching PDF:", full_link)
-                    # return full_link
+            if href and any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
+                full_link = urljoin(base_url, href)
+                result_links.append(full_link)
 
-        # print("❌ No matching PDF found.")
-        return l
+        return result_links
 
     except Exception as e:
-        # print("❌ Error:", e)
+        print("❌ Error:", e)
         return []
     finally:
         driver.quit()
+
 # import requests
 # from bs4 import BeautifulSoup
 # from urllib.parse import urljoin
+# import re
 
-# def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
+# # Optional Selenium import
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from webdriver_manager.chrome import ChromeDriverManager
+
+# def find_presentation_pdf(url, keywords=("presentation", "earnings", "results"), timeout=20):
+#     print(f"🔍 Checking: {url}")
+
+#     # 1️⃣ Step 1: Try direct API sniffing (if known)
+#     if "westernunion" in url:
+#         return fetch_from_known_api("https://ir.westernunion.com/api/v1/ir/event-presentations", keywords)
+
+#     # 2️⃣ Step 2: Try HTML scraping (static links)
 #     try:
-#         print(f"Fetching page: {base_url}")
-#         headers = {'User-Agent': 'Mozilla/5.0'}
-#         response = requests.get(base_url, headers=headers, timeout=timeout)
-#         response.raise_for_status()
+#         html = requests.get(url, timeout=15).text
+#         soup = BeautifulSoup(html, "html.parser")
+#         links = soup.find_all("a", href=True)
 
-#         soup = BeautifulSoup(response.text, 'html.parser')
+#         results = []
+#         for link in links:
+#             href = link['href']
+#             text = link.get_text().lower()
+#             if href.lower().endswith('.pdf') and any(k.lower() in text or k.lower() in href.lower() for k in keywords):
+#                 full_link = urljoin(url, href)
+#                 results.append(full_link)
 
-#         pdf_links = []
-#         # Find all <a> tags with href containing ".pdf" (case-insensitive)
-#         for link in soup.find_all('a', href=True):
-#             href = link['href'].lower()
-#             if '.pdf' in href:
-#                 full_link = urljoin(base_url, link['href'])
-#                 text = link.get_text(strip=True).lower()
+#         if results:
+#             print(f"✅ Found {len(results)} PDF(s) via BeautifulSoup.")
+#             return results
+#     except Exception as e:
+#         print(f"⚠️ HTML parsing failed: {e}")
 
-#                 # Check keywords in href or link text
-#                 if any(kw.lower() in href or kw.lower() in text for kw in keywords):
-#                     pdf_links.append(full_link)
+#     # 3️⃣ Step 3: Use Selenium for dynamic content
+#     print("⏳ Falling back to Selenium...")
 
-#         print(f"🔍 Found {len(pdf_links)} matching PDF links.")
-#         return pdf_links
+#     options = Options()
+#     options.add_argument('--headless')
+#     options.add_argument('--no-sandbox')
+#     options.add_argument('--disable-dev-shm-usage')
+
+#     service = Service(ChromeDriverManager().install())
+#     driver = webdriver.Chrome(service=service, options=options)
+
+#     try:
+#         driver.get(url)
+#         WebDriverWait(driver, timeout).until(
+#             EC.presence_of_element_located((By.XPATH, "//a[contains(translate(@href, 'PDF', 'pdf'), '.pdf')]"))
+#         )
+
+#         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'PDF', 'pdf'), '.pdf')]")
+
+#         results = []
+#         for link in pdf_links:
+#             href = link.get_attribute("href")
+#             text = link.text.lower()
+#             if href and any(k.lower() in href.lower() or k.lower() in text for k in keywords):
+#                 results.append(urljoin(url, href))
+
+#         print(f"✅ Found {len(results)} PDF(s) via Selenium.")
+#         return results
 
 #     except Exception as e:
-#         print(f"❌ Error fetching or parsing page: {e}")
-#         return None
+#         print(f"❌ Selenium failed: {e}")
+#         return []
+#     finally:
+#         driver.quit()
+
+# def fetch_from_known_api(api_url, keywords):
+#     print(f"🌐 Using known API: {api_url}")
+#     headers = {
+#         "User-Agent": "Mozilla/5.0",
+#         "Accept": "application/json"
+#     }
+
+#     try:
+#         res = requests.get(api_url, headers=headers, timeout=10)
+#         if res.status_code != 200:
+#             print(f"⚠️ API returned status {res.status_code}")
+#             return []
+        
+#         data = res.json()
+#         results = []
+#         for item in data.get("data", []):
+#             file_url = item.get("fileUrl") or item.get("url") or ""
+#             title = item.get("title", "")
+#             if file_url.endswith(".pdf") and any(k.lower() in title.lower() or k.lower() in file_url.lower() for k in keywords):
+#                 results.append(file_url)
+#         print(f"✅ Found {len(results)} PDF(s) via API.")
+#         return results
+
+#     except Exception as e:
+#         print(f"❌ API fetch failed: {e}")
+#         return []
+
+
 
 
 
@@ -139,7 +223,7 @@ def delete_file(file_path):
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
@@ -193,6 +277,7 @@ def find_investor_url(bank_name):
                 # print(f"🔗 Found Investor URL: {real_url}")
                 # return real_url
                 URLS.append(real_url)
-
+                if(len(URLS)>5):
+                    break
     # print("❌ No valid investor link found.")
     return URLS

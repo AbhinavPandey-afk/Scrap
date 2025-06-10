@@ -14,7 +14,8 @@ def index():
         quarter = int(request.form['quarter'])
         year = int(request.form['year'])
 
-        investor_urls = find_investor_url(bank_name)
+        # investor_urls = find_investor_url(bank_name)
+        investor_urls = ["https://investors.franklinresources.com/investor-relations/investor-home/default.aspx"]
         if len(investor_urls)==0:
             return "Investor site not found. Please try again."
 
