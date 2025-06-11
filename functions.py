@@ -19,148 +19,113 @@ from webdriver_manager.chrome import ChromeDriverManager
 # from webdriver_manager.chrome import ChromeDriverManager
 # import time
 
-def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage') 
-
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-
-    try:
-        print(f"Opening: {base_url}")
-        driver.get(base_url)
-
-        # Wait up to `timeout` seconds for any anchor tag to appear
-        WebDriverWait(driver, timeout).until(
-            EC.presence_of_element_located((By.TAG_NAME, "a"))
-        )
-
-        # Give time for JS to populate hrefs if needed
-        time.sleep(3)
-
-        pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
-        print(f"🔍 Found {len(pdf_links)} PDF links on the page.")
-
-        result_links = []
-        for link in pdf_links:
-            href = link.get_attribute("href")
-            link_text = link.text.strip().lower()
-            if href and any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
-                full_link = urljoin(base_url, href)
-                result_links.append(full_link)
-
-        return result_links
-
-    except Exception as e:
-        print("❌ Error:", e)
-        return []
-    finally:
-        driver.quit()
-
-# import requests
-# from bs4 import BeautifulSoup
-# from urllib.parse import urljoin
-# import re
-
-# # Optional Selenium import
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from webdriver_manager.chrome import ChromeDriverManager
-
-# def find_presentation_pdf(url, keywords=("presentation", "earnings", "results"), timeout=20):
-#     print(f"🔍 Checking: {url}")
-
-#     # 1️⃣ Step 1: Try direct API sniffing (if known)
-#     if "westernunion" in url:
-#         return fetch_from_known_api("https://ir.westernunion.com/api/v1/ir/event-presentations", keywords)
-
-#     # 2️⃣ Step 2: Try HTML scraping (static links)
-#     try:
-#         html = requests.get(url, timeout=15).text
-#         soup = BeautifulSoup(html, "html.parser")
-#         links = soup.find_all("a", href=True)
-
-#         results = []
-#         for link in links:
-#             href = link['href']
-#             text = link.get_text().lower()
-#             if href.lower().endswith('.pdf') and any(k.lower() in text or k.lower() in href.lower() for k in keywords):
-#                 full_link = urljoin(url, href)
-#                 results.append(full_link)
-
-#         if results:
-#             print(f"✅ Found {len(results)} PDF(s) via BeautifulSoup.")
-#             return results
-#     except Exception as e:
-#         print(f"⚠️ HTML parsing failed: {e}")
-
-#     # 3️⃣ Step 3: Use Selenium for dynamic content
-#     print("⏳ Falling back to Selenium...")
-
+# def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
 #     options = Options()
 #     options.add_argument('--headless')
 #     options.add_argument('--no-sandbox')
-#     options.add_argument('--disable-dev-shm-usage')
+#     options.add_argument('--disable-dev-shm-usage') 
 
 #     service = Service(ChromeDriverManager().install())
 #     driver = webdriver.Chrome(service=service, options=options)
 
 #     try:
-#         driver.get(url)
+#         print(f"Opening: {base_url}")
+#         driver.get(base_url)
+
+#         # Wait up to `timeout` seconds for any anchor tag to appear
 #         WebDriverWait(driver, timeout).until(
-#             EC.presence_of_element_located((By.XPATH, "//a[contains(translate(@href, 'PDF', 'pdf'), '.pdf')]"))
+#             EC.presence_of_element_located((By.TAG_NAME, "a"))
 #         )
 
-#         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'PDF', 'pdf'), '.pdf')]")
+#         # Give time for JS to populate hrefs if needed
+#         time.sleep(3)
 
-#         results = []
+#         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
+#         print(f"Found {len(pdf_links)} PDF links on the page.")
+
+#         result_links = []
 #         for link in pdf_links:
 #             href = link.get_attribute("href")
-#             text = link.text.lower()
-#             if href and any(k.lower() in href.lower() or k.lower() in text for k in keywords):
-#                 results.append(urljoin(url, href))
+#             link_text = link.text.strip().lower()
+#             if href and any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
+#                 full_link = urljoin(base_url, href)
+#                 result_links.append(full_link)
 
-#         print(f"✅ Found {len(results)} PDF(s) via Selenium.")
-#         return results
+#         return result_links
 
 #     except Exception as e:
-#         print(f"❌ Selenium failed: {e}")
+#         print("Error:", e)
 #         return []
 #     finally:
 #         driver.quit()
 
-# def fetch_from_known_api(api_url, keywords):
-#     print(f"🌐 Using known API: {api_url}")
-#     headers = {
-#         "User-Agent": "Mozilla/5.0",
-#         "Accept": "application/json"
-#     }
 
-#     try:
-#         res = requests.get(api_url, headers=headers, timeout=10)
-#         if res.status_code != 200:
-#             print(f"⚠️ API returned status {res.status_code}")
-#             return []
-        
-#         data = res.json()
-#         results = []
-#         for item in data.get("data", []):
-#             file_url = item.get("fileUrl") or item.get("url") or ""
-#             title = item.get("title", "")
-#             if file_url.endswith(".pdf") and any(k.lower() in title.lower() or k.lower() in file_url.lower() for k in keywords):
-#                 results.append(file_url)
-#         print(f"✅ Found {len(results)} PDF(s) via API.")
-#         return results
+import requests
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 
-#     except Exception as e:
-#         print(f"❌ API fetch failed: {e}")
-#         return []
+def extract_pdfs_from_api(base_url, keywords):
+    print("Trying known API endpoints...")
+    api_paths = [
+        "/api/documents?limit=100&sort=Date desc",
+        "/api/eventitems?limit=100&sort=Date desc",
+        "/api/pressreleases?limit=100&sort=Date desc"
+    ]
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+    results = []
+
+    for path in api_paths:
+        full_url = urljoin(base_url, path)
+        try:
+            res = requests.get(full_url, headers=headers, timeout=10)
+            if res.status_code == 200 and res.headers.get("Content-Type", "").startswith("application/json"):
+                data = res.json()
+                for item in data.get("data", []):
+                    file_url = item.get("fileUrl") or item.get("url", "")
+                    title = item.get("title", "")
+                    if file_url.endswith(".pdf") and any(k in title.lower() or k in file_url.lower() for k in keywords):
+                        results.append(file_url)
+        except Exception:
+            continue
+
+    return list(set(results))
+
+
+def extract_pdfs_static(url, keywords):
+    print("Trying static scraping...")
+    results = []
+    try:
+        html = requests.get(url, timeout=10).text
+        soup = BeautifulSoup(html, "html.parser")
+        for link in soup.find_all("a", href=True):
+            href = link['href']
+            text = link.get_text().lower()
+            if href.lower().endswith('.pdf') and any(k in href.lower() or k in text for k in keywords):
+                results.append(urljoin(url, href))
+    except Exception:
+        pass
+    return list(set(results))
+
+
+def find_presentation_pdf(bank_url, keywords=("presentation", "earnings", "results")):
+    print(f"Checking: {bank_url}")
+    
+    # Stage 1: Try API
+    api_results = extract_pdfs_from_api(bank_url, keywords)
+    if api_results:
+        print(f"Found {len(api_results)} PDFs via API")
+        return api_results
+    
+    # Stage 2: Try Static Scrape
+    static_results = extract_pdfs_static(bank_url, keywords)
+    if static_results:
+        print(f"Found {len(static_results)} PDFs via static HTML")
+        return static_results
+
+    print("No PDFs found using current methods.")
+    return []
+
 
 
 
@@ -216,14 +181,14 @@ def delete_file(file_path):
     try:
         os.remove(file_path)
     except Exception as e:
-        print(f"⚠️ Could not delete file: {e}")
+        print(f"Could not delete file: {e}")
 
 
 # DeepSeek API call function
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
@@ -279,5 +244,5 @@ def find_investor_url(bank_name):
                 URLS.append(real_url)
                 if(len(URLS)>5):
                     break
-    # print("❌ No valid investor link found.")
+    # print("No valid investor link found.")
     return URLS

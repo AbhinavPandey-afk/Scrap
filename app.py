@@ -14,8 +14,8 @@ def index():
         quarter = int(request.form['quarter'])
         year = int(request.form['year'])
 
-        # investor_urls = find_investor_url(bank_name)
-        investor_urls = ["https://investors.franklinresources.com/investor-relations/investor-home/default.aspx"]
+        investor_urls = find_investor_url(bank_name)
+        # investor_urls = ["https://investors.franklinresources.com/investor-relations/investor-home/default.aspx"]
         if len(investor_urls)==0:
             return "Investor site not found. Please try again."
 
@@ -73,15 +73,15 @@ def index():
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(["Name", "Quarter", "Year", "Revenue", "Net Income", "Date"])
-                writer.writerow([bank_name, quarter, year, answers[1], answers[2], answers[3]])
-                writer.writerow([bank_name, prev_q, prev_y, answers[4], answers[5], answers[6]])
-                writer.writerow([bank_name, quarter, year - 1, answers[7], answers[8], answers[9]])
+                writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2]])
+                writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]])
+                writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8]])
         else:
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow([bank_name, quarter, year, answers[1], answers[2], answers[3]])
-                writer.writerow([bank_name, prev_q, prev_y, answers[4], answers[5], answers[6]])
-                writer.writerow([bank_name, quarter, year - 1, answers[7], answers[8], answers[9]])
+                writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2]])
+                writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]])
+                writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8]])
 
 
 

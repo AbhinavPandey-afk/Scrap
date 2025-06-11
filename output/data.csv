@@ -1,0 +1,12 @@
+Name,Quarter,Year,Revenue,Net Income,Date
+CitiGroup,1,2025,$ 1.2 Billion,15/04/2025,"The context provided contains no revenue data.  
+**Unable to determine Q4 2024 revenue.**  
+
+*(Note: Exact numerical extraction requires source data in the context.)*"
+CitiGroup,4,2024,No data available,17/10/2024,"The total revenue for Q1 2024 was not mentioned in the provided context.  
+
+**Output:**  
+[no data]"
+TCS,1,2025,$30.0 Billion,Not Available,10/04/2025
+TCS,4,2024,$7.58 Billion,$ 2.4 Billion,10/04/2025
+TCS,1,2024,Data not found,$ 0.0 Billion,The date of publication for the Q1 conference details in 2024 is **not found** in the provided documents.
