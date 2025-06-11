@@ -61,7 +61,7 @@ def index():
         for query in queries:
             response = query_deepseek(query, context)
             
-            print(response)
+            # print(response)
             answer = response['choices'][0]['message']['content']
             # row.append(answer)
             answers.append(answer)
