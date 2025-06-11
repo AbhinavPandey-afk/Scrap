@@ -29,7 +29,10 @@ def index():
         keywords = ("presentation", "earnings", "results", str(year), str(prev_y))
         for investor_url in investor_urls:
             pdf_links += find_presentation_pdf(investor_url, keywords)
-
+            
+        if len(pdf_links)>10:
+            pdf_links=pdf_links[:10]
+        
         context = ""
         for pdf_link in pdf_links:
             local_path = "presentation.pdf"
@@ -61,9 +64,9 @@ def index():
         for query in queries:
             response = query_deepseek(query, context)
             
-            # print(response)
+            print(response)
             answer = response['choices'][0]['message']['content']
-            # row.append(answer)
+
             answers.append(answer)
 
         csv_path = 'output/data.csv'

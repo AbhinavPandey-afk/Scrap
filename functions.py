@@ -188,7 +188,7 @@ def delete_file(file_path):
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
