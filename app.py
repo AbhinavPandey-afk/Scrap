@@ -30,27 +30,36 @@ def index():
         for investor_url in investor_urls:
             pdf_links += find_presentation_pdf(investor_url, keywords)
             
-        if len(pdf_links)>20:
-            pdf_links=pdf_links[:20]
+        if len(pdf_links)>5:
+            pdf_links=pdf_links[:5]
         
-        summaries = summarize_pdf_links(pdf_links)
+        # summaries = summarize_pdf_links(pdf_links)
+        
         
         context = ""
-        for url in summaries:
-            context+=summaries[url]
+        for pdf_link in pdf_links:
+            local_path = "presentation.pdf"
+            try:
+                # downloaded_path = download_pdf(pdf_link, local_path)
+                downloaded_path = download_pdf(pdf_link)
+                context += "\n" + load_and_prepare_pdf(downloaded_path)
+            finally:
+                delete_file(local_path)
+        # for url in summaries:
+        #     context+=summaries[url]
 
         queries = [
             # "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
 
-            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - in xyz(dont use commas in between) millions, no extra information needed",
+            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - in $xyz(dont use commas in between) millions always print millions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector  reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. 20 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - in xyz(dont use commas in between) millions, no extra information needed",
+            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - in $xyz(dont use commas in between) millions always print millions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - in xyz(dont use commas in between) millions, no extra information needed",
+            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - in $xyz(dont use commas in between) millions always print millions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
@@ -58,10 +67,11 @@ def index():
         row = []
         answers=[]
         for query in queries:
-            response = query_deepseek(query, context)
-            
-            print(response)
-            answer = response['choices'][0]['message']['content']
+            # response = query_deepseek(query, context)
+            answer = query_gemini(query, context)
+
+            print(answer)
+            # answer = response['choices'][0]['message']['content']
 
             answers.append(answer)
 

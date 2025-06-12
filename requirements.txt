@@ -12,3 +12,4 @@ flask
 PyPDF2 
 transformers 
 torch
+google-generativeai

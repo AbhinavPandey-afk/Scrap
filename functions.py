@@ -158,7 +158,7 @@ def crawl_and_find_pdfs(base_url, keywords, max_pages=5):
     return list(pdfs)
 
 
-def find_presentation_pdf(bank_url, keywords=("presentation", "earnings", "results")):
+def find_presentation_pdf(bank_url, keywords=("presentation", "earnings", "results","")):
     print(f"Checking: {bank_url}")
     
     # Stage 1: API
@@ -245,7 +245,7 @@ def delete_file(file_path):
 def query_deepseek(prompt, context):
     api_url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
+        "Authorization": "Bearer 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",  # replace with actual key
         "Content-Type": "application/json"
     }
     payload = {
@@ -276,7 +276,32 @@ def query_deepseek(prompt, context):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return {"error": str(e)}
+""" Gemini """
+import google.generativeai as genai
 
+# Set your Gemini API key (store securely in real apps)
+genai.configure(api_key="AIzaSyDlucjlAIzx0Z63KZUrvtNtFZbCroI8u_U")
+
+def query_gemini(prompt, context):
+    # Combine context and prompt just like your previous logic
+    full_prompt = (
+        "You are a financial analyst extracting precise numerical data.\n\n"
+        f"Context: {context}\n\n"
+        f"Question: {prompt}"
+    )
+
+    try:
+        # Using Gemini 1.5 Pro model
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        response = model.generate_content(full_prompt)
+        return response.text
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return {"error": str(e)}
+    
+
+"""asdyaduashduasd"""
 def find_investor_url(bank_name):
     import requests
     from bs4 import BeautifulSoup
@@ -313,68 +338,68 @@ def get_fs(total,per):
     fs = amt*per_amt*0.01
     return curr+str(fs)+" "+txt
 
-""" Summarizinf pdf texts"""
-import os
-import requests
-from PyPDF2 import PdfReader
-from transformers import pipeline
+# """ Summarizinf pdf texts"""
+# import os
+# import requests
+# from PyPDF2 import PdfReader
+# from transformers import pipeline
 
-# Step 1: Load summarization model
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+# # Step 1: Load summarization model
+# summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
-# Step 2: Download PDF from URL
-def download_pdf(url, save_dir="pdfs"):
-    os.makedirs(save_dir, exist_ok=True)
-    local_filename = os.path.join(save_dir, url.split("/")[-1].split("?")[0])
-    try:
-        response = requests.get(url, timeout=15)
-        if response.status_code == 200 and response.headers["Content-Type"] == "application/pdf":
-            with open(local_filename, "wb") as f:
-                f.write(response.content)
-            return local_filename
-        else:
-            print(f"Failed to download: {url}")
-            return None
-    except Exception as e:
-        print(f"Error downloading {url}: {e}")
-        return None
+# # Step 2: Download PDF from URL
+# def download_pdf(url, save_dir="pdfs"):
+#     os.makedirs(save_dir, exist_ok=True)
+#     local_filename = os.path.join(save_dir, url.split("/")[-1].split("?")[0])
+#     try:
+#         response = requests.get(url, timeout=15)
+#         if response.status_code == 200 and response.headers["Content-Type"] == "application/pdf":
+#             with open(local_filename, "wb") as f:
+#                 f.write(response.content)
+#             return local_filename
+#         else:
+#             print(f"Failed to download: {url}")
+#             return None
+#     except Exception as e:
+#         print(f"Error downloading {url}: {e}")
+#         return None
 
-# Step 3: Extract text from PDF
-def extract_text_from_pdf(pdf_path):
-    text = ""
-    try:
-        reader = PdfReader(pdf_path)
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
-    except Exception as e:
-        print(f"Error reading {pdf_path}: {e}")
-    return text.strip()
+# # Step 3: Extract text from PDF
+# def extract_text_from_pdf(pdf_path):
+#     text = ""
+#     try:
+#         reader = PdfReader(pdf_path)
+#         for page in reader.pages:
+#             page_text = page.extract_text()
+#             if page_text:
+#                 text += page_text + "\n"
+#     except Exception as e:
+#         print(f"Error reading {pdf_path}: {e}")
+#     return text.strip()
 
-# Step 4: Summarize extracted text
-def summarize_text(text, max_chunk=1000):
-    if not text.strip():
-        return "No readable text found."
-    chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
-    summaries = []
-    for chunk in chunks:
-        try:
-            summary = summarizer(chunk, max_length=120, min_length=30, do_sample=False)[0]['summary_text']
-            summaries.append(summary)
-        except Exception as e:
-            print(f"Summarization failed: {e}")
-            continue
-    return "\n".join(summaries) if summaries else "Could not generate summary."
+# # Step 4: Summarize extracted text
+# def summarize_text(text, max_chunk=1000):
+#     if not text.strip():
+#         return "No readable text found."
+#     chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
+#     summaries = []
+#     for chunk in chunks:
+#         try:
+#             summary = summarizer(chunk, max_length=120, min_length=30, do_sample=False)[0]['summary_text']
+#             summaries.append(summary)
+#         except Exception as e:
+#             print(f"Summarization failed: {e}")
+#             continue
+#     return "\n".join(summaries) if summaries else "Could not generate summary."
 
-# Step 5: Process multiple PDF links
-def summarize_pdf_links(pdf_urls):
-    all_summaries = {}
-    for url in pdf_urls:
-        print(f"\n🔗 Processing: {url}")
-        path = download_pdf(url)
-        if path:
-            text = extract_text_from_pdf(path)
-            summary = summarize_text(text)
-            all_summaries[url] = summary
-    return all_summaries
+# # Step 5: Process multiple PDF links
+# def summarize_pdf_links(pdf_urls):
+#     all_summaries = {}
+#     for url in pdf_urls:
+#         print(f"\n🔗 Processing: {url}")
+#         path = download_pdf(url)
+#         if path:
+#             text = extract_text_from_pdf(path)
+#             summary = summarize_text(text)
+#             all_summaries[url] = summary
+#     return all_summaries
