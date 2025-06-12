@@ -339,67 +339,72 @@ def get_fs(total,per):
     return curr+str(fs)+" "+txt
 
 # """ Summarizinf pdf texts"""
-# import os
-# import requests
-# from PyPDF2 import PdfReader
-# from transformers import pipeline
+import os
+import requests
+from PyPDF2 import PdfReader
+from transformers import pipeline
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# # Step 1: Load summarization model
-# summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+# Summarization pipeline (fast model)
+summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
 
-# # Step 2: Download PDF from URL
-# def download_pdf(url, save_dir="pdfs"):
-#     os.makedirs(save_dir, exist_ok=True)
-#     local_filename = os.path.join(save_dir, url.split("/")[-1].split("?")[0])
-#     try:
-#         response = requests.get(url, timeout=15)
-#         if response.status_code == 200 and response.headers["Content-Type"] == "application/pdf":
-#             with open(local_filename, "wb") as f:
-#                 f.write(response.content)
-#             return local_filename
-#         else:
-#             print(f"Failed to download: {url}")
-#             return None
-#     except Exception as e:
-#         print(f"Error downloading {url}: {e}")
-#         return None
+# Download PDF
+def download_pdf(url, save_dir="pdfs"):
+    os.makedirs(save_dir, exist_ok=True)
+    local_filename = os.path.join(save_dir, url.split("/")[-1].split("?")[0])
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200 and 'application/pdf' in response.headers.get("Content-Type", ""):
+            with open(local_filename, "wb") as f:
+                f.write(response.content)
+            return local_filename
+    except Exception as e:
+        print(f"[!] Error downloading {url}: {e}")
+    return None
 
-# # Step 3: Extract text from PDF
-# def extract_text_from_pdf(pdf_path):
-#     text = ""
-#     try:
-#         reader = PdfReader(pdf_path)
-#         for page in reader.pages:
-#             page_text = page.extract_text()
-#             if page_text:
-#                 text += page_text + "\n"
-#     except Exception as e:
-#         print(f"Error reading {pdf_path}: {e}")
-#     return text.strip()
+# Extract text
+def extract_text_from_pdf(pdf_path, min_len=500):
+    try:
+        reader = PdfReader(pdf_path)
+        text = "".join([page.extract_text() or "" for page in reader.pages])
+        return text if len(text.strip()) >= min_len else ""
+    except Exception as e:
+        print(f"[!] Error reading {pdf_path}: {e}")
+        return ""
 
-# # Step 4: Summarize extracted text
-# def summarize_text(text, max_chunk=1000):
-#     if not text.strip():
-#         return "No readable text found."
-#     chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
-#     summaries = []
-#     for chunk in chunks:
-#         try:
-#             summary = summarizer(chunk, max_length=120, min_length=30, do_sample=False)[0]['summary_text']
-#             summaries.append(summary)
-#         except Exception as e:
-#             print(f"Summarization failed: {e}")
-#             continue
-#     return "\n".join(summaries) if summaries else "Could not generate summary."
+# Summarize
+def summarize_text(text, max_chunk=3000):
+    if not text.strip():
+        return "No readable text found."
+    chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
+    summaries = []
+    for chunk in chunks:
+        try:
+            summary = summarizer(chunk, max_length=130, min_length=30, do_sample=False)[0]["summary_text"]
+            summaries.append(summary)
+        except Exception as e:
+            print(f"[!] Summarization error: {e}")
+    return "\n".join(summaries) if summaries else "Summary could not be generated."
 
-# # Step 5: Process multiple PDF links
-# def summarize_pdf_links(pdf_urls):
-#     all_summaries = {}
-#     for url in pdf_urls:
-#         print(f"\n🔗 Processing: {url}")
-#         path = download_pdf(url)
-#         if path:
-#             text = extract_text_from_pdf(path)
-#             summary = summarize_text(text)
-#             all_summaries[url] = summary
-#     return all_summaries
+# Process a single URL (used in parallel)
+def process_single_pdf(url):
+    print(f"[•] Processing: {url}")
+    path = download_pdf(url)
+    if not path:
+        return (url, "Download failed.")
+    text = extract_text_from_pdf(path)
+    if not text:
+        return (url, "Skipped: Not enough readable text.")
+    summary = summarize_text(text)
+    return (url, summary)
+
+# Main parallel function
+def summarize_pdf_links_parallel(pdf_urls, max_workers=4):
+    results = {}
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(process_single_pdf, url) for url in pdf_urls]
+        for future in as_completed(futures):
+            url, summary = future.result()
+            results[url] = summary
+    return results
+

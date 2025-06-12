@@ -30,23 +30,24 @@ def index():
         for investor_url in investor_urls:
             pdf_links += find_presentation_pdf(investor_url, keywords)
             
-        if len(pdf_links)>5:
-            pdf_links=pdf_links[:5]
+        if len(pdf_links)>20:
+            pdf_links=pdf_links[:20]
         
-        # summaries = summarize_pdf_links(pdf_links)
-        
-        
+        summaries = summarize_pdf_links_parallel(pdf_links)
         context = ""
-        for pdf_link in pdf_links:
-            local_path = "presentation.pdf"
-            try:
-                # downloaded_path = download_pdf(pdf_link, local_path)
-                downloaded_path = download_pdf(pdf_link)
-                context += "\n" + load_and_prepare_pdf(downloaded_path)
-            finally:
-                delete_file(local_path)
-        # for url in summaries:
-        #     context+=summaries[url]
+        for url in summaries:
+            context+=summaries[url]
+        
+        
+        # for pdf_link in pdf_links:
+        #     local_path = "presentation.pdf"
+        #     try:
+        #         # downloaded_path = download_pdf(pdf_link, local_path)
+        #         downloaded_path = download_pdf(pdf_link)
+        #         context += "\n" + load_and_prepare_pdf(downloaded_path)
+        #     finally:
+        #         delete_file(local_path)
+        
 
         queries = [
             # "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
