@@ -47,15 +47,15 @@ def index():
             # "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
 
             f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
-            f"What is the net income reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the percentage of contribution of BFSI or Financial Segment or Sector  reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. 20 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
             f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
-            f"What is the net income reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
             f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
-            f"What is the net income reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
 
@@ -75,7 +75,7 @@ def index():
         if os.stat(csv_path).st_size == 0:  # File is empty
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(["Name", "Quarter", "Year", "Revenue", "Net Income", "Date"])
+                writer.writerow(["Name", "Quarter", "Year", "Revenue", "BFSI Percentile", "Date"])
                 writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2]])
                 writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]])
                 writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8]])
