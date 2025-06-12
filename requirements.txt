@@ -9,3 +9,6 @@ langchain-community
 tqdm
 gunicorn
 flask
+PyPDF2 
+transformers 
+torch

@@ -30,31 +30,27 @@ def index():
         for investor_url in investor_urls:
             pdf_links += find_presentation_pdf(investor_url, keywords)
             
-        if len(pdf_links)>10:
-            pdf_links=pdf_links[:10]
+        if len(pdf_links)>20:
+            pdf_links=pdf_links[:20]
+        
+        summaries = summarize_pdf_links(pdf_links)
         
         context = ""
-        for pdf_link in pdf_links:
-            local_path = "presentation.pdf"
-            try:
-                # downloaded_path = download_pdf(pdf_link, local_path)
-                downloaded_path = download_pdf(pdf_link)
-                context += "\n" + load_and_prepare_pdf(downloaded_path)
-            finally:
-                delete_file(local_path)
+        for url in summaries:
+            context+=summaries[url]
 
         queries = [
             # "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
 
-            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - in millions or billions, no extra information needed",
+            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - in xyz(dont use commas in between) millions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector  reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. 20 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - in millions or billions, no extra information needed",
+            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - in xyz(dont use commas in between) millions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - in millions or billions, no extra information needed",
+            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - in xyz(dont use commas in between) millions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
@@ -75,16 +71,16 @@ def index():
         if os.stat(csv_path).st_size == 0:  # File is empty
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(["Name", "Quarter", "Year", "Revenue", "BFSI Percentile", "Date"])
-                writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2]])
-                writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]])
-                writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8]])
+                writer.writerow(["Name", "Quarter", "Year", "Total Revenue", "BFSI Percentile", "Date", "FS Revenue"])
+                writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2],get_fs(answers[0],answers[1])])
+                writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]],get_fs(answers[3],answers[4]))
+                writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8],get_fs(answers[6],answers[7])])
         else:
             with open(csv_path, 'a', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2]])
-                writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]])
-                writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8]])
+                writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2],get_fs(answers[0],answers[1])])
+                writer.writerow([bank_name, prev_q, prev_y, answers[3], answers[4], answers[5]],get_fs(answers[3],answers[4]))
+                writer.writerow([bank_name, quarter, year - 1, answers[6], answers[7], answers[8],get_fs(answers[6],answers[7])])
 
 
 
