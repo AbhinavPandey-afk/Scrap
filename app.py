@@ -46,15 +46,15 @@ def index():
         queries = [
             # "What is the name of the bank? Provide only the name no extra information. Example:- Citigroup.",
 
-            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the total revenue reported for quarter {quarter} in year {year}  ? Provide exact value only in the form - in millions or billions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector  reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. 20 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the total revenue reported for quarter {prev_q} in year {prev_y}  ? Provide exact value only in the form - in millions or billions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {prev_q} in year {prev_y}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {prev_q} in year {prev_y} ? Return in this form only - DD/MM/YYYY format no extra information needed.",
 
-            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - e.g. $ 1.0 Billion, no extra information needed",
+            f"What is the total revenue reported for quarter {quarter} in year {year-1}  ? Provide exact value only in the form - in millions or billions, no extra information needed",
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
