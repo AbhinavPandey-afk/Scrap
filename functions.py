@@ -9,56 +9,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from urllib.parse import urljoin
-# from webdriver_manager.chrome import ChromeDriverManager
-# import time
-
-# def find_presentation_pdf(base_url, keywords=("presentation",), timeout=15):
-#     options = Options()
-#     options.add_argument('--headless')
-#     options.add_argument('--no-sandbox')
-#     options.add_argument('--disable-dev-shm-usage') 
-
-#     service = Service(ChromeDriverManager().install())
-#     driver = webdriver.Chrome(service=service, options=options)
-
-#     try:
-#         print(f"Opening: {base_url}")
-#         driver.get(base_url)
-
-#         # Wait up to `timeout` seconds for any anchor tag to appear
-#         WebDriverWait(driver, timeout).until(
-#             EC.presence_of_element_located((By.TAG_NAME, "a"))
-#         )
-
-#         # Give time for JS to populate hrefs if needed
-#         time.sleep(3)
-
-#         pdf_links = driver.find_elements(By.XPATH, "//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '.pdf')]")
-#         print(f"Found {len(pdf_links)} PDF links on the page.")
-
-#         result_links = []
-#         for link in pdf_links:
-#             href = link.get_attribute("href")
-#             link_text = link.text.strip().lower()
-#             if href and any(kw.lower() in link_text or kw.lower() in href.lower() for kw in keywords):
-#                 full_link = urljoin(base_url, href)
-#                 result_links.append(full_link)
-
-#         return result_links
-
-#     except Exception as e:
-#         print("Error:", e)
-#         return []
-#     finally:
-#         driver.quit()
-
 
 import re
 import requests
@@ -196,16 +146,7 @@ import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-# Download PDF
-# def download_pdf(pdf_url, save_path="presentation.pdf"):
-#     response = requests.get(pdf_url)
-#     if response.status_code == 200:
-#         with open(save_path, "wb") as f:
-#             f.write(response.content)
-#         # print(f"✅ PDF downloaded to {save_path}")
-#         return save_path
-#     else:
-#         raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
+
 import tempfile
 
 def download_pdf(pdf_url):
@@ -227,13 +168,7 @@ def load_and_prepare_pdf(local_pdf_path):
     docs = splitter.split_documents(pages)
     return "\n".join([doc.page_content for doc in docs[:5]])
 
-# Delete the file
-# def delete_file(file_path):
-#     if os.path.exists(file_path):
-#         os.remove(file_path)
-        # print(f"🗑 Deleted file: {file_path}")
-    # else:
-        # print(f"⚠ File not found: {file_path}")
+
 def delete_file(file_path):
     try:
         os.remove(file_path)
@@ -337,74 +272,3 @@ def get_fs(total,per):
     per_amt = float(per[:len(per)-1])
     fs = amt*per_amt*0.01
     return curr+str(fs)+" "+txt
-
-# """ Summarizinf pdf texts"""
-import os
-import requests
-from PyPDF2 import PdfReader
-from transformers import pipeline
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-# Summarization pipeline (fast model)
-summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
-
-# Download PDF
-def download_pdf(url, save_dir="pdfs"):
-    os.makedirs(save_dir, exist_ok=True)
-    local_filename = os.path.join(save_dir, url.split("/")[-1].split("?")[0])
-    try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200 and 'application/pdf' in response.headers.get("Content-Type", ""):
-            with open(local_filename, "wb") as f:
-                f.write(response.content)
-            return local_filename
-    except Exception as e:
-        print(f"[!] Error downloading {url}: {e}")
-    return None
-
-# Extract text
-def extract_text_from_pdf(pdf_path, min_len=500):
-    try:
-        reader = PdfReader(pdf_path)
-        text = "".join([page.extract_text() or "" for page in reader.pages])
-        return text if len(text.strip()) >= min_len else ""
-    except Exception as e:
-        print(f"[!] Error reading {pdf_path}: {e}")
-        return ""
-
-# Summarize
-def summarize_text(text, max_chunk=3000):
-    if not text.strip():
-        return "No readable text found."
-    chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
-    summaries = []
-    for chunk in chunks:
-        try:
-            summary = summarizer(chunk, max_length=130, min_length=30, do_sample=False)[0]["summary_text"]
-            summaries.append(summary)
-        except Exception as e:
-            print(f"[!] Summarization error: {e}")
-    return "\n".join(summaries) if summaries else "Summary could not be generated."
-
-# Process a single URL (used in parallel)
-def process_single_pdf(url):
-    print(f"[•] Processing: {url}")
-    path = download_pdf(url)
-    if not path:
-        return (url, "Download failed.")
-    text = extract_text_from_pdf(path)
-    if not text:
-        return (url, "Skipped: Not enough readable text.")
-    summary = summarize_text(text)
-    return (url, summary)
-
-# Main parallel function
-def summarize_pdf_links_parallel(pdf_urls, max_workers=4):
-    results = {}
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_single_pdf, url) for url in pdf_urls]
-        for future in as_completed(futures):
-            url, summary = future.result()
-            results[url] = summary
-    return results
-
