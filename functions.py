@@ -13,12 +13,14 @@ COMPANY_NAMES = [
     "Infosys",
     "Accenture",
     "Capgemini",
-    "JP Morgan Chase",
-    "Citigroup",
-    "Goldman Sachs",
-    "Franklin Templeton",
-    "Bank of America",
-    "HSBC Holdings"
+    "Cognizant",
+    "Techmahindra",
+    "LTIMindtree",
+    "Mphasis",
+    "Birlasoft",
+    "Coforge",
+    "Zensar",
+    "Persistent Systens"
 ]
 
 
@@ -144,13 +146,6 @@ def find_presentation_pdf(bank_url, keywords=("presentation", "earnings", "resul
 
     print("No PDFs found using current methods.")
     return []
-
-
-
-
-
-
-
 ''' Function to convert link to text and get Revenue'''
 
 import requests
@@ -298,27 +293,79 @@ def get_fs(total, per):
     fs = amt * per_amt * 0.01
     return f"{curr}{fs} {txt}"
 """IF ELSE"""
-# Add this to your functions.py
-def generate_quarterly_url(company, fy, quarter):
-    """
-    Generate company specific quarterly result URLs.
-    """
-    fy_path = fy.replace("-", "")[-2:]  # e.g. 2024-2025 --> 25
-    qnum = quarter.lower().replace("q", "")  # e.g. Q4 --> 4
+# # Add this to your functions.py
+# def generate_quarterly_url(company, fy, quarter):
+#     """
+#     Generate company specific quarterly result URLs.
+#     """
+#     fy_path = fy.replace("-", "")[-2:]  # e.g. 2024-2025 --> 25
+#     qnum = quarter.lower().replace("q", "")  # e.g. Q4 --> 4
 
-    if company.lower() == "wipro":
-        return f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/{fy}/q{qnum}fy{fy_path}/datasheet-q{qnum}fy{fy_path}.pdf"
+#     if company.lower() == "wipro":
+#         return f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/{fy}/q{qnum}fy{fy_path}/datasheet-q{qnum}fy{fy_path}.pdf"
 
-    elif company.lower() == "tcs":
-        return f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/{fy}/q{qnum}/Presentations/Q{qnum} {fy} Fact Sheet.pdf"
+#     elif company.lower() == "tcs":
+#         return f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/{fy}/q{qnum}/Presentations/Q{qnum} {fy} Fact Sheet.pdf"
 
-    elif company.lower() == "infosys":
-        return f"https://www.infosys.com/content/dam/infosys-web/en/investors/reports-filings/quarterly-results/{fy}/q{qnum}/documents/fact-sheet.pdf"
+#     elif company.lower() == "infosys":
+#         return f"https://www.infosys.com/content/dam/infosys-web/en/investors/reports-filings/quarterly-results/{fy}/q{qnum}/documents/fact-sheet.pdf"
 
-    # If dynamic companies, just return None, they will fallback to search & scraping
-    elif company.lower() in ["accenture", "capgemini", "cognizant", "coforge", "techmahindra", "hcl"]:
-        return None
+#     # If dynamic companies, just return None, they will fallback to search & scraping
+#     elif company.lower() in ["accenture", "capgemini", "cognizant", "coforge", "techmahindra", "hcl"]:
+#         return None
     
-    else:
-        return None  # default fallback for unsupported
+#     else:
+#         return None  # default fallback for unsupported
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+
+company_sources = {
+    "Wipro": {
+        "base_url": "https://www.wipro.com",
+        "results_page": "https://www.wipro.com/investors/quarterly-results/",
+        "anchor_contains": "Analyst Datasheet"
+    },
+    "TCS": {
+        "base_url": "https://www.tcs.com",
+        "results_page": "https://www.tcs.com/investor-relations/financial-statements",
+        "anchor_contains": "Fact Sheet"
+    },
+    "Infosys": {
+        "base_url": "https://www.infosys.com",
+        "results_page": "https://www.infosys.com/investors/reports-filings/quarterly-results/2024-2025/q4.html",
+        "anchor_contains": "Fact Sheet"
+    },
+    "Accenture": {
+        "base_url": "https://investor.accenture.com",
+        "results_page": "https://investor.accenture.com/news-and-events/events-calendar/2025/03-20-2025",
+        "anchor_contains": "Earnings Release"
+    },
+    "Capgemini": {
+        "base_url": "https://investors.capgemini.com",
+        "results_page": "https://investors.capgemini.com/en/financial-results/?fiscal-year=2025",
+        "anchor_contains": "Download"
+    }
+}
+
+def get_pdf_link(company):
+    info = company_sources[company]
+    resp = requests.get(info['results_page'])
+    soup = BeautifulSoup(resp.content, 'html.parser')
+    
+    for a in soup.find_all('a'):
+        href = a.get('href')
+        text = a.get_text().strip()
+        if info['anchor_contains'].lower() in text.lower():
+            if href.startswith("http"):
+                print(f"[DEBUG] PDF link selected for {company}: {href}")
+                return href
+            else:
+                full_url = urljoin(info['base_url'], href)
+                print(f"[DEBUG] PDF link selected for {company}: {full_url}")
+                return full_url
+    
+    print(f"[DEBUG] No PDF link found for {company}")
+    return None
+
 

@@ -119,30 +119,47 @@ def index():
 
         # Generate Fiscal Year string
         fy = f"{year-1}-{year}"
-
-        # First try generating URL directly if supported
-        pdf_links = []
-        generated_url = generate_quarterly_url(bank_name, fy, f"Q{quarter}")
-        if generated_url:
-            pdf_links.append(generated_url)
-        else:
-            # Otherwise fall back to old investor search method
-            investor_urls = find_investor_url(bank_name)
-            if len(investor_urls) == 0:
-                return "Investor site not found. Please try again."
-            keywords = ("presentation", "earnings", "results", str(year), str(year-1))
-            for investor_url in investor_urls:
-                pdf_links += find_presentation_pdf(investor_url, keywords)
-
-            if len(pdf_links) > 5:
-                pdf_links = pdf_links[:5]
-
-        # Handle previous quarter and previous year
         prev_q = quarter - 1
         prev_y = year
         if prev_q == 0:
             prev_q = 4
             prev_y = year - 1
+        # First try generating URL directly if supported
+        pdf_links = []
+        # generated_url = generate_quarterly_url(bank_name, fy, f"Q{quarter}")
+        generated_url = get_pdf_link(bank_name)
+        if generated_url:
+            pdf_links.append(generated_url)
+            print("Direct PDF found from hardcoded company_sources.")
+            print(f"[PDF SELECTED]: {generated_url}")
+        else:
+            investor_urls = find_investor_url(bank_name)
+            if len(investor_urls) == 0:
+                return "Investor site not found. Please try again."
+
+            keywords = ("revenue", "results", "quarterly", "fact sheet", "Analyst Datasheet")
+            for investor_url in investor_urls:
+                pdf_links += find_presentation_pdf(investor_url, keywords)
+
+    # Filter top 5 PDFs based on matching year or prev_y
+            filtered_links = []
+            for i in pdf_links:
+                if (str(prev_y) in i.lower()) or (str(year) in i.lower()):
+                    filtered_links.append(i)
+                    if len(filtered_links) >= 5:
+                        break
+
+    # If filtering yielded less than 5, take first 5 anyway
+            if len(filtered_links) < 5:
+                filtered_links = pdf_links[:5]
+
+            pdf_links = filtered_links
+
+            print("Fallback method selected the following PDFs:")
+            for idx, link in enumerate(pdf_links):
+                print(f"[PDF #{idx+1}]: {link}")
+
+        # Handle previous quarter and previous year
 
         context = ""
         for pdf_link in pdf_links:
@@ -166,7 +183,7 @@ def index():
             f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year-1}? Provide exact value only in the form - e.g. 10 %, no extra information needed",
             f"What is the date of publishment of conference of quarter {quarter} in year {year-1} ? Return in this form only - DD/MM/YYYY format no extra information needed."
         ]
-
+        print(context)
         answers = []
         for query in queries:
             answer = query_gemini(query, context)
