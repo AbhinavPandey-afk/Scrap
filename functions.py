@@ -395,28 +395,29 @@ def get_fs(total, per):
 import requests
 
 def get_pdf_link(company, quar, year):
-    # Use previous year for FY calculations
-    fy_year = f"{year-1}-{year}"
+    yy = str(year)[-2:]  # last two digits of year
+    fy_string = f"{year-1}-{year}"  # for formats like 2024-2025
 
-    # Define the link templates (examples: replace with actual ones you'll give me)
     company_sources = {
-        "Wipro": f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/2024-2025/q4fy25/datasheet-q4fy25.pdf",
-        "TCS": f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2024-25/q4/Presentations/Q4%202024-25%20Fact%20Sheet.pdf",
-        "Infosys": f"https://www.infosys.com/investors/reports-filings/quarterly-results/2024-2025/q4/documents/fact-sheet.pdf",
-        "Accenture": f"https://investor.accenture.com/~/media/Files/A/Accenture-IR-V3/quarterly-earnings/2025/q2fy25/accentures-second-quarter-fiscal-2025-earnings-release.pdf",
-        "Capgemini": f"https://investors.capgemini.com/en/financial-results/{year}/Q{quar}/download.pdf",
-        "Cognizant": f"https://cognizant.q4cdn.com/123993165/files/doc_earnings/2025/q1/presentation/Q125-Earnings-Supplement.pdf",
-        "Techmahindra": f"https://insights.techmahindra.com/investors/tml-q4-fy-25-fact-sheet.pdf",
-        "ltimindtree": f"https://www.ltimindtree.com/wp-content/uploads/2025/04/earnings-release-factsheet-q4fy25.pdf",
-        "mphasis": f"https://mphasis.com/home/corporate/investors/financial-results/{year}/Q{quar}.pdf",
-        "birlasoft": f"https://birlasoft.com/company/investors/financial-results/{year}/Q{quar}/investor-update.pdf"
+        "wipro": f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/{year-1}-{year}/q{quar}fy{yy}/datasheet-q{quar}fy{yy}.pdf",
+        "tcs": f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/{year-1}-{yy}/q{quar}/Presentations/Q{quar}%20{year-1}-{yy}%20Fact%20Sheet.pdf",
+        "infosys": f"https://www.infosys.com/investors/reports-filings/quarterly-results/{year-1}-{year}/q{quar}/documents/fact-sheet.pdf",
+        "accenture": f"https://investor.accenture.com/~/media/Files/A/Accenture-IR-V3/quarterly-earnings/{year}/q{quar}fy{yy}/accentures-{['first','second','third','fourth'][quar-1]}-quarter-fiscal-{year}-earnings-release.pdf",
+        "capgemini": f"https://investors.capgemini.com/en/financial-results/{year}/Q{quar}/download.pdf",
+        "cognizant": f"https://cognizant.q4cdn.com/123993165/files/doc_earnings/{year}/q{quar}/presentation/Q{quar}{yy}-Earnings-Supplement.pdf",
+        "techmahindra": f"https://insights.techmahindra.com/investors/tml-q{quar}-fy-{yy}-fact-sheet.pdf",
+        "ltimindtree": f"https://www.ltimindtree.com/wp-content/uploads/{year}/04/earnings-release-factsheet-q{quar}fy{yy}.pdf",
+        "mphasis": f"https://www.mphasis.com/content/dam/mphasis-com/global/en/investors/financial-results/{year}/q{quar}-earnings-press-release.pdf",
+        "birlasoft": f"https://www.birlasoft.com/sites/default/files/resources/downloads/investors/investor-update/q{quar}-fy{yy}-investor-update.pdf",
+        "coforge": f"https://www.coforge.com/hubfs/Fact-Sheet-Q{quar}FY{yy}.pdf",
+        "zensar": f"https://www.zensar.com/about/investors/",  # No PDF link provided
+        "persistent systems": f"https://www.persistent.com/investors/quarterly-results/"
     }
 
     try:
-        pdf_url = company_sources[company.lower()]  # Use .lower() for safe key lookup
-        return pdf_url
+        return company_sources[company.lower()]
     except Exception as e:
-        print(f"Error: No URL template found for {company}")
+        print(f"Error: No URL template found for {company}",e)
         return None
 
 
