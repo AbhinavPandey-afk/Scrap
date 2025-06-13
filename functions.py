@@ -185,40 +185,40 @@ def delete_file(file_path):
 
 
 # DeepSeek API call function
-def query_deepseek(prompt, context):
-    api_url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": "Bearer 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",  # replace with actual key
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "deepseek/deepseek-r1-0528:free",
-        # "model":"meta-llama/llama-3.3-8b-instruct:free",
-        "messages": [
-            {"role": "system", "content": "You are a financial analyst extracting precise numerical data."},
-            {"role": "user", "content": f"Context: {context}\n\nQuestion: {prompt}"}
-        ],
-        "temperature": 0.5
-    }
+# def query_deepseek(prompt, context):
+#     api_url = "https://openrouter.ai/api/v1/chat/completions"
+#     headers = {
+#         "Authorization": "Bearer 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",  # replace with actual key
+#         "Content-Type": "application/json"
+#     }
+#     payload = {
+#         "model": "deepseek/deepseek-r1-0528:free",
+#         # "model":"meta-llama/llama-3.3-8b-instruct:free",
+#         "messages": [
+#             {"role": "system", "content": "You are a financial analyst extracting precise numerical data."},
+#             {"role": "user", "content": f"Context: {context}\n\nQuestion: {prompt}"}
+#         ],
+#         "temperature": 0.5
+#     }
 
-    # response = requests.post(api_url, headers=headers, json=payload)
-    # return response.json()
-    try:
-        response = requests.post(api_url, headers=headers, json=payload)
-        response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
-        return response.json()
+#     # response = requests.post(api_url, headers=headers, json=payload)
+#     # return response.json()
+#     try:
+#         response = requests.post(api_url, headers=headers, json=payload)
+#         response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
+#         return response.json()
 
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP error occurred: {e}")
-        return {"error": str(e), "details": response.text}
+#     except requests.exceptions.HTTPError as e:
+#         print(f"HTTP error occurred: {e}")
+#         return {"error": str(e), "details": response.text}
 
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
-        return {"error": str(e)}
+#     except requests.exceptions.RequestException as e:
+#         print(f"Request failed: {e}")
+#         return {"error": str(e)}
 
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return {"error": str(e)}
+#     except Exception as e:
+#         print(f"Unexpected error: {e}")
+#         return {"error": str(e)}
 """ Gemini """
 import google.generativeai as genai
 
@@ -324,7 +324,7 @@ company_sources = {
     "Wipro": {
         "base_url": "https://www.wipro.com",
         "results_page": "https://www.wipro.com/investors/quarterly-results/",
-        "anchor_contains": "Analyst Datasheet"
+        "anchor_contains": "Press Release"
     },
     "TCS": {
         "base_url": "https://www.tcs.com",
@@ -345,7 +345,23 @@ company_sources = {
         "base_url": "https://investors.capgemini.com",
         "results_page": "https://investors.capgemini.com/en/financial-results/?fiscal-year=2025",
         "anchor_contains": "Download"
-    }
+    },
+    "Cognizant": {
+        "base_url": "https://investors.cognizant.com/",
+        "results_page": "https://investors.cognizant.com/financials/quarterly-results/default.aspx",
+        "anchor_contains": "Presentation"
+    },
+    "Techmahindra": {
+        "base_url": "https://www.techmahindra.com/investors",
+        "results_page": "https://www.techmahindra.com/investors/quarterly-earnings/",
+        "anchor_contains": "Fact Sheet"
+    },
+    "ltimindtree": {
+        "base_url": "https://www.ltimindtree.com/investors",
+        "results_page": "https://www.ltimindtree.com/investors/financial-results/",
+        "anchor_contains": "earnings-release-factsheet"
+    },
+
 }
 
 def get_pdf_link(company):
