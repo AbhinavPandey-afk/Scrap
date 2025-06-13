@@ -316,72 +316,108 @@ def get_fs(total, per):
     
 #     else:
 #         return None  # default fallback for unsupported
+# import requests
+# from bs4 import BeautifulSoup
+# from urllib.parse import urljoin
+
+# def get_pdf_link(company,quar,year):
+#     company_sources = {
+#     "Wipro": {
+#         "base_url": "https://www.wipro.com",
+#         "results_page": "https://www.wipro.com/investors/quarterly-results/",
+#         "anchor_contains": "Press Release"
+#     },
+#     "TCS": {
+#         "base_url": "https://www.tcs.com",
+#         "results_page": "https://www.tcs.com/investor-relations/financial-statements",
+#         "anchor_contains": "Fact Sheet"
+#     },
+#     "Infosys": {
+#         "base_url": "https://www.infosys.com",
+#         "results_page": "https://www.infosys.com/investors/reports-filings/quarterly-results/2024-2025/q4.html",
+#         "anchor_contains": "Fact Sheet"
+#     },
+#     "Accenture": {
+#         "base_url": "https://investor.accenture.com",
+#         "results_page": "https://investor.accenture.com/news-and-events/events-calendar/2025/03-20-2025",
+#         "anchor_contains": "Earnings Release"
+#     },
+#     "Capgemini": {
+#         "base_url": "https://investors.capgemini.com",
+#         "results_page": "https://investors.capgemini.com/en/financial-results/?fiscal-year=2025",
+#         "anchor_contains": "Download"
+#     },
+#     "Cognizant": {
+#         "base_url": "https://investors.cognizant.com/",
+#         "results_page": "https://investors.cognizant.com/financials/quarterly-results/default.aspx",
+#         "anchor_contains": "Presentation"
+#     },
+#     "Techmahindra": {
+#         "base_url": "https://www.techmahindra.com/investors",
+#         "results_page": "https://www.techmahindra.com/investors/quarterly-earnings/",
+#         "anchor_contains": "Fact Sheet"
+#     },
+#     "ltimindtree": {
+#         "base_url": "https://www.ltimindtree.com/investors",
+#         "results_page": "https://www.ltimindtree.com/investors/financial-results/",
+#         "anchor_contains": "Earnings Release and Factsheet"
+#     },
+#     "mphasis": {
+#         "base_url": "https://www.mphasis.com/home/corporate/investors.html",
+#         "results_page": "https://www.mphasis.com/home/corporate/investors.html",
+#         "anchor_contains": "Financial Results"
+#     },
+#     "birlasoft": {
+#         "base_url": "https://www.birlasoft.com",
+#         "results_page": "https://www.birlasoft.com/company/investors/financial-results",
+#         "anchor_contains": "Investor Update"
+#     }
+# }
+#     info = company_sources[company]
+#     resp = requests.get(info['results_page'])
+#     soup = BeautifulSoup(resp.content, 'html.parser')
+    
+#     for a in soup.find_all('a'):
+#         href = a.get('href')
+#         text = a.get_text().strip()
+#         print(text)
+#         if info['anchor_contains'].lower() in text.lower():
+#             if href.startswith("http"):
+#                 print(f"[DEBUG] PDF link selected for {company}: {href}")
+#                 return href
+#             else:
+#                 full_url = urljoin(info['base_url'], href)
+#                 print(f"[DEBUG] PDF link selected for {company}: {full_url}")
+#                 return full_url
+    
+#     print(f"[DEBUG] No PDF link found for {company}")
+#     return None
 import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 
-company_sources = {
-    "Wipro": {
-        "base_url": "https://www.wipro.com",
-        "results_page": "https://www.wipro.com/investors/quarterly-results/",
-        "anchor_contains": "Press Release"
-    },
-    "TCS": {
-        "base_url": "https://www.tcs.com",
-        "results_page": "https://www.tcs.com/investor-relations/financial-statements",
-        "anchor_contains": "Fact Sheet"
-    },
-    "Infosys": {
-        "base_url": "https://www.infosys.com",
-        "results_page": "https://www.infosys.com/investors/reports-filings/quarterly-results/2024-2025/q4.html",
-        "anchor_contains": "Fact Sheet"
-    },
-    "Accenture": {
-        "base_url": "https://investor.accenture.com",
-        "results_page": "https://investor.accenture.com/news-and-events/events-calendar/2025/03-20-2025",
-        "anchor_contains": "Earnings Release"
-    },
-    "Capgemini": {
-        "base_url": "https://investors.capgemini.com",
-        "results_page": "https://investors.capgemini.com/en/financial-results/?fiscal-year=2025",
-        "anchor_contains": "Download"
-    },
-    "Cognizant": {
-        "base_url": "https://investors.cognizant.com/",
-        "results_page": "https://investors.cognizant.com/financials/quarterly-results/default.aspx",
-        "anchor_contains": "Presentation"
-    },
-    "Techmahindra": {
-        "base_url": "https://www.techmahindra.com/investors",
-        "results_page": "https://www.techmahindra.com/investors/quarterly-earnings/",
-        "anchor_contains": "Fact Sheet"
-    },
-    "ltimindtree": {
-        "base_url": "https://www.ltimindtree.com/investors",
-        "results_page": "https://www.ltimindtree.com/investors/financial-results/",
-        "anchor_contains": "earnings-release-factsheet"
-    },
+def get_pdf_link(company, quar, year):
+    # Use previous year for FY calculations
+    fy_year = f"{year-1}-{year}"
 
-}
+    # Define the link templates (examples: replace with actual ones you'll give me)
+    company_sources = {
+        "Wipro": f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/2024-2025/q4fy25/datasheet-q4fy25.pdf",
+        "TCS": f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2024-25/q4/Presentations/Q4%202024-25%20Fact%20Sheet.pdf",
+        "Infosys": f"https://www.infosys.com/investors/reports-filings/quarterly-results/2024-2025/q4/documents/fact-sheet.pdf",
+        "Accenture": f"https://investor.accenture.com/~/media/Files/A/Accenture-IR-V3/quarterly-earnings/2025/q2fy25/accentures-second-quarter-fiscal-2025-earnings-release.pdf",
+        "Capgemini": f"https://investors.capgemini.com/en/financial-results/{year}/Q{quar}/download.pdf",
+        "Cognizant": f"https://cognizant.q4cdn.com/123993165/files/doc_earnings/2025/q1/presentation/Q125-Earnings-Supplement.pdf",
+        "Techmahindra": f"https://insights.techmahindra.com/investors/tml-q4-fy-25-fact-sheet.pdf",
+        "ltimindtree": f"https://www.ltimindtree.com/wp-content/uploads/2025/04/earnings-release-factsheet-q4fy25.pdf",
+        "mphasis": f"https://mphasis.com/home/corporate/investors/financial-results/{year}/Q{quar}.pdf",
+        "birlasoft": f"https://birlasoft.com/company/investors/financial-results/{year}/Q{quar}/investor-update.pdf"
+    }
 
-def get_pdf_link(company):
-    info = company_sources[company]
-    resp = requests.get(info['results_page'])
-    soup = BeautifulSoup(resp.content, 'html.parser')
-    
-    for a in soup.find_all('a'):
-        href = a.get('href')
-        text = a.get_text().strip()
-        if info['anchor_contains'].lower() in text.lower():
-            if href.startswith("http"):
-                print(f"[DEBUG] PDF link selected for {company}: {href}")
-                return href
-            else:
-                full_url = urljoin(info['base_url'], href)
-                print(f"[DEBUG] PDF link selected for {company}: {full_url}")
-                return full_url
-    
-    print(f"[DEBUG] No PDF link found for {company}")
-    return None
+    try:
+        pdf_url = company_sources[company.lower()]  # Use .lower() for safe key lookup
+        return pdf_url
+    except Exception as e:
+        print(f"Error: No URL template found for {company}")
+        return None
+
 
 

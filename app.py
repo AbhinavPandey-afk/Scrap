@@ -125,7 +125,7 @@ def index():
             prev_y = year - 1
 
         pdf_links = []
-        generated_url = get_pdf_link(bank_name)
+        generated_url = get_pdf_link(bank_name,quarter,year)
         if generated_url:
             pdf_links.append(generated_url)
             print("Direct PDF found from hardcoded company_sources.")
