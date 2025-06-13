@@ -7,6 +7,19 @@ from urllib.parse import urljoin
 import time
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+COMPANY_NAMES = [
+    "Wipro",
+    "TCS",
+    "Infosys",
+    "Accenture",
+    "Capgemini",
+    "JP Morgan Chase",
+    "Citigroup",
+    "Goldman Sachs",
+    "Franklin Templeton",
+    "Bank of America",
+    "HSBC Holdings"
+]
 
 
 
@@ -264,11 +277,48 @@ def find_investor_url(bank_name):
     # print("No valid investor link found.")
     return URLS
 
-def get_fs(total,per):
-    curr=total[0]
-    total=total[1:]
-    amt = float(total.split(" ")[0])
-    txt = total.split(" ")[1]
-    per_amt = float(per[:len(per)-1])
-    fs = amt*per_amt*0.01
-    return curr+str(fs)+" "+txt
+import re
+
+def get_fs(total, per):
+    curr = total[0]
+    
+    # Use regex to extract the numeric part from total string
+    match = re.search(r'(\d+(\.\d+)?)', total)
+    if not match:
+        raise ValueError(f"Could not parse total revenue value: '{total}'")
+    amt = float(match.group(1))
+
+    # Also clean up the units (e.g. "millions")
+    txt_match = re.search(r'(millions|billion|thousand)', total.lower())
+    txt = txt_match.group(1) if txt_match else 'millions'
+
+    # Extract numeric part from percent (e.g. '20 %' -> 20.0)
+    per_amt = float(re.search(r'\d+(\.\d+)?', per).group())
+
+    fs = amt * per_amt * 0.01
+    return f"{curr}{fs} {txt}"
+"""IF ELSE"""
+# Add this to your functions.py
+def generate_quarterly_url(company, fy, quarter):
+    """
+    Generate company specific quarterly result URLs.
+    """
+    fy_path = fy.replace("-", "")[-2:]  # e.g. 2024-2025 --> 25
+    qnum = quarter.lower().replace("q", "")  # e.g. Q4 --> 4
+
+    if company.lower() == "wipro":
+        return f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/{fy}/q{qnum}fy{fy_path}/datasheet-q{qnum}fy{fy_path}.pdf"
+
+    elif company.lower() == "tcs":
+        return f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/{fy}/q{qnum}/Presentations/Q{qnum} {fy} Fact Sheet.pdf"
+
+    elif company.lower() == "infosys":
+        return f"https://www.infosys.com/content/dam/infosys-web/en/investors/reports-filings/quarterly-results/{fy}/q{qnum}/documents/fact-sheet.pdf"
+
+    # If dynamic companies, just return None, they will fallback to search & scraping
+    elif company.lower() in ["accenture", "capgemini", "cognizant", "coforge", "techmahindra", "hcl"]:
+        return None
+    
+    else:
+        return None  # default fallback for unsupported
+
