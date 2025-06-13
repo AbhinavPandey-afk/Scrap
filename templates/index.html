@@ -66,7 +66,21 @@
       <h2>Financial Report Extractor</h2>
       <form method="post">
         <label for="bank">Company Name:</label>
-        <input type="text" id="bank" name="bank" required />
+        <label for="bank">Company Name:</label>
+        <select id="bank" name="bank" required>
+          <option value="">--Select Company--</option>
+          <option value="Wipro">Wipro</option>
+          <option value="TCS">TCS</option>
+          <option value="Infosys">Infosys</option>
+          <option value="Accenture">Accenture</option>
+          <option value="Capgemini">Capgemini</option>
+          <option value="JP Morgan Chase">JP Morgan Chase</option>
+          <option value="Citigroup">Citigroup</option>
+          <option value="Goldman Sachs">Goldman Sachs</option>
+          <option value="Franklin Templeton">Franklin Templeton</option>
+          <option value="Bank of America">Bank of America</option>
+          <option value="HSBC Holdings">HSBC Holdings</option>
+        </select>
 
         <label for="quarter">Quarter (1-4):</label>
         <input
