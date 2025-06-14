@@ -455,6 +455,7 @@ import requests
 def get_pdf_link(company, quar, year):
     yy = str(year)[-2:]  # last two digits of year
     fy_string = f"{year-1}-{year}"  # for formats like 2024-2025
+    
 
     company_sources = {
         "wipro": f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/{year-1}-{year}/q{quar}fy{yy}/datasheet-q{quar}fy{yy}.pdf",
@@ -469,8 +470,16 @@ def get_pdf_link(company, quar, year):
         "birlasoft": f"https://www.birlasoft.com/sites/default/files/resources/downloads/investors/investor-update/q{quar}-fy{yy}-investor-update.pdf",
         "coforge": f"https://www.coforge.com/hubfs/Fact-Sheet-Q{quar}FY{yy}.pdf",
         "zensar": f"https://www.zensar.com/sites/default/files/investor/analyst-meet/Zensar-Analyst-Presentation-Q{quar}FY{yy}.pdf",  # No PDF link provided
-        "persistent systems": f"https://www.persistent.com/wp-content/uploads/2025/04/analyst-presentation-and-factsheet-q4fy25.pdf"
+        # "persistent systems": f"https://www.persistent.com/wp-content/uploads/2025/04/analyst-presentation-and-factsheet-q4fy25.pdf"
     }
+    if quar==4:
+        company_sources["persistent systems"] = f"https://www.persistent.com/wp-content/uploads/{year}/04/analyst-presentation-and-factsheet-q4fy{yy}.pdf"
+    elif quar==3:
+        company_sources["persistent systems"] = f"https://www.persistent.com/wp-content/uploads/{year}/01/analyst-presentation-and-factsheet-q3fy{yy}.pdf"
+    elif quar==2:
+        company_sources["persistent systems"] = f"https://www.persistent.com/wp-content/uploads/{year-1}/10/analyst-presentation-and-factsheet-q2fy{yy}.pdf"
+    else:
+        company_sources["persistent systems"] = f"https://www.persistent.com/wp-content/uploads/{year-1}/07/analyst-presentation-and-factsheet-q1fy{yy}.pdf"
 
     try:
         return company_sources[company.lower()]
