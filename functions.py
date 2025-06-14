@@ -214,6 +214,47 @@ def load_and_prepare_pdf(local_pdf_path):
 
     # Only return first few chunks (keep file size manageable for Gemini)
     return "\n".join([doc.page_content for doc in docs[:10]])
+def load_and_prepare_html(local_html_path):
+    from bs4 import BeautifulSoup
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+    # Keywords we care about (same as PDF for consistency)
+    relevant_keywords = [
+        'revenue', 'financials', 'total income', 'segment results',
+        'bfs', 'bfs sector', 'bfs segment', 'bfs contribution',
+        'earnings', 'EBIT', 'profit', 'operating income',
+        'quarterly performance', 'growth', 'currency', 'millions', 'billions'
+    ]
+
+    # Load HTML
+    with open(local_html_path, 'r', encoding="utf-8", errors="ignore") as f:
+        html_content = f.read()
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    full_text = soup.get_text(separator="\n", strip=True)
+
+    # Lowercase text for keyword matching
+    text_lower = full_text.lower()
+
+    # Extract relevant sections (line by line filtering)
+    relevant_lines = []
+    for line in full_text.split('\n'):
+        line_lower = line.lower()
+        if any(keyword in line_lower for keyword in relevant_keywords):
+            relevant_lines.append(line.strip())
+
+    # If nothing matched, fallback to entire text (limit to 5000 chars for safety)
+    if not relevant_lines:
+        relevant_text = full_text[:5000]
+    else:
+        relevant_text = "\n".join(relevant_lines)
+
+    # Chunk splitting (similar to PDF logic)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150)
+    docs = splitter.split_text(relevant_text)
+
+    # Return first few chunks only
+    return "\n".join(docs[:10])
 
 
 
@@ -222,43 +263,6 @@ def delete_file(file_path):
         os.remove(file_path)
     except Exception as e:
         print(f"Could not delete file: {e}")
-
-
-# DeepSeek API call function
-# def query_deepseek(prompt, context):
-#     api_url = "https://openrouter.ai/api/v1/chat/completions"
-#     headers = {
-#         "Authorization": "Bearer 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",  # replace with actual key
-#         "Content-Type": "application/json"
-#     }
-#     payload = {
-#         "model": "deepseek/deepseek-r1-0528:free",
-#         # "model":"meta-llama/llama-3.3-8b-instruct:free",
-#         "messages": [
-#             {"role": "system", "content": "You are a financial analyst extracting precise numerical data."},
-#             {"role": "user", "content": f"Context: {context}\n\nQuestion: {prompt}"}
-#         ],
-#         "temperature": 0.5
-#     }
-
-#     # response = requests.post(api_url, headers=headers, json=payload)
-#     # return response.json()
-#     try:
-#         response = requests.post(api_url, headers=headers, json=payload)
-#         response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
-#         return response.json()
-
-#     except requests.exceptions.HTTPError as e:
-#         print(f"HTTP error occurred: {e}")
-#         return {"error": str(e), "details": response.text}
-
-#     except requests.exceptions.RequestException as e:
-#         print(f"Request failed: {e}")
-#         return {"error": str(e)}
-
-#     except Exception as e:
-#         print(f"Unexpected error: {e}")
-#         return {"error": str(e)}
 """ Gemini """
 import google.generativeai as genai
 
@@ -313,25 +317,6 @@ def find_investor_url(bank_name):
     return URLS
 
 import re
-
-# def get_fs(total, per):
-#     curr = total[0]
-    
-#     # Use regex to extract the numeric part from total string
-#     match = re.search(r'(\d+(\.\d+)?)', total)
-#     if not match:
-#         raise ValueError(f"Could not parse total revenue value: '{total}'")
-#     amt = float(match.group(1))
-
-#     # Also clean up the units (e.g. "millions")
-#     txt_match = re.search(r'(millions|billion|thousand)', total.lower())
-#     txt = txt_match.group(1) if txt_match else 'millions'
-
-#     # Extract numeric part from percent (e.g. '20 %' -> 20.0)
-#     per_amt = float(re.search(r'\d+(\.\d+)?', per).group())
-
-#     fs = amt * per_amt * 0.01
-#     return f"{curr}{fs} {txt}"
 def get_fs(total_revenue, unit, currency, bfsi_percentile):
     """
     Calculate BFSI revenue based on cleaned inputs:
@@ -350,106 +335,7 @@ def get_fs(total_revenue, unit, currency, bfsi_percentile):
 
     return f"{currency}{bfsirev} {unit}"
 
-"""IF ELSE"""
-# # Add this to your functions.py
-# def generate_quarterly_url(company, fy, quarter):
-#     """
-#     Generate company specific quarterly result URLs.
-#     """
-#     fy_path = fy.replace("-", "")[-2:]  # e.g. 2024-2025 --> 25
-#     qnum = quarter.lower().replace("q", "")  # e.g. Q4 --> 4
 
-#     if company.lower() == "wipro":
-#         return f"https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/{fy}/q{qnum}fy{fy_path}/datasheet-q{qnum}fy{fy_path}.pdf"
-
-#     elif company.lower() == "tcs":
-#         return f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/{fy}/q{qnum}/Presentations/Q{qnum} {fy} Fact Sheet.pdf"
-
-#     elif company.lower() == "infosys":
-#         return f"https://www.infosys.com/content/dam/infosys-web/en/investors/reports-filings/quarterly-results/{fy}/q{qnum}/documents/fact-sheet.pdf"
-
-#     # If dynamic companies, just return None, they will fallback to search & scraping
-#     elif company.lower() in ["accenture", "capgemini", "cognizant", "coforge", "techmahindra", "hcl"]:
-#         return None
-    
-#     else:
-#         return None  # default fallback for unsupported
-# import requests
-# from bs4 import BeautifulSoup
-# from urllib.parse import urljoin
-
-# def get_pdf_link(company,quar,year):
-#     company_sources = {
-#     "Wipro": {
-#         "base_url": "https://www.wipro.com",
-#         "results_page": "https://www.wipro.com/investors/quarterly-results/",
-#         "anchor_contains": "Press Release"
-#     },
-#     "TCS": {
-#         "base_url": "https://www.tcs.com",
-#         "results_page": "https://www.tcs.com/investor-relations/financial-statements",
-#         "anchor_contains": "Fact Sheet"
-#     },
-#     "Infosys": {
-#         "base_url": "https://www.infosys.com",
-#         "results_page": "https://www.infosys.com/investors/reports-filings/quarterly-results/2024-2025/q4.html",
-#         "anchor_contains": "Fact Sheet"
-#     },
-#     "Accenture": {
-#         "base_url": "https://investor.accenture.com",
-#         "results_page": "https://investor.accenture.com/news-and-events/events-calendar/2025/03-20-2025",
-#         "anchor_contains": "Earnings Release"
-#     },
-#     "Capgemini": {
-#         "base_url": "https://investors.capgemini.com",
-#         "results_page": "https://investors.capgemini.com/en/financial-results/?fiscal-year=2025",
-#         "anchor_contains": "Download"
-#     },
-#     "Cognizant": {
-#         "base_url": "https://investors.cognizant.com/",
-#         "results_page": "https://investors.cognizant.com/financials/quarterly-results/default.aspx",
-#         "anchor_contains": "Presentation"
-#     },
-#     "Techmahindra": {
-#         "base_url": "https://www.techmahindra.com/investors",
-#         "results_page": "https://www.techmahindra.com/investors/quarterly-earnings/",
-#         "anchor_contains": "Fact Sheet"
-#     },
-#     "ltimindtree": {
-#         "base_url": "https://www.ltimindtree.com/investors",
-#         "results_page": "https://www.ltimindtree.com/investors/financial-results/",
-#         "anchor_contains": "Earnings Release and Factsheet"
-#     },
-#     "mphasis": {
-#         "base_url": "https://www.mphasis.com/home/corporate/investors.html",
-#         "results_page": "https://www.mphasis.com/home/corporate/investors.html",
-#         "anchor_contains": "Financial Results"
-#     },
-#     "birlasoft": {
-#         "base_url": "https://www.birlasoft.com",
-#         "results_page": "https://www.birlasoft.com/company/investors/financial-results",
-#         "anchor_contains": "Investor Update"
-#     }
-# }
-#     info = company_sources[company]
-#     resp = requests.get(info['results_page'])
-#     soup = BeautifulSoup(resp.content, 'html.parser')
-    
-#     for a in soup.find_all('a'):
-#         href = a.get('href')
-#         text = a.get_text().strip()
-#         print(text)
-#         if info['anchor_contains'].lower() in text.lower():
-#             if href.startswith("http"):
-#                 print(f"[DEBUG] PDF link selected for {company}: {href}")
-#                 return href
-#             else:
-#                 full_url = urljoin(info['base_url'], href)
-#                 print(f"[DEBUG] PDF link selected for {company}: {full_url}")
-#                 return full_url
-    
-#     print(f"[DEBUG] No PDF link found for {company}")
-#     return None
 import requests
 
 def get_pdf_link(company, quar, year):
@@ -486,6 +372,27 @@ def get_pdf_link(company, quar, year):
     except Exception as e:
         print(f"Error: No URL template found for {company}",e)
         return None
+def detect_file_type(file_path):
+    with open(file_path, 'rb') as f:
+        header = f.read(4)
+        if header == b'%PDF':
+            return 'pdf'
+        elif header.startswith(b'<!DO') or header.startswith(b'<ht'):
+            return 'html'
+        else:
+            return 'unknown'
+def process_file(file_path):
+    file_type = detect_file_type(file_path)
+    
+    if file_type == 'pdf':
+        return load_and_prepare_pdf(file_path)
+    
+    elif file_type == 'html':
+        return load_and_prepare_html(file_path)
+    
+    else:
+        print("❌ Unknown file type. Skipping.")
+        return ""
 
 
 
