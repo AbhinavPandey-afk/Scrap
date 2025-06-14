@@ -123,14 +123,68 @@ def index():
         if prev_q == 0:
             prev_q = 4
             prev_y = year - 1
+        
+        # pdf_links = []
+        # generated_url = get_pdf_link(bank_name,quarter,year)
+        # if generated_url:
+        #     pdf_links.append(generated_url)
+        #     print("Direct PDF found from hardcoded company_sources.")
+        #     print(f"[PDF SELECTED]: {generated_url}")
+        # else:
+        #     investor_urls = find_investor_url(bank_name)
+        #     if len(investor_urls) == 0:
+        #         return "Investor site not found. Please try again."
 
+        #     keywords = ("revenue", "results", "quarterly", "fact sheet", "Analyst Datasheet")
+        #     for investor_url in investor_urls:
+        #         pdf_links += find_presentation_pdf(investor_url, keywords)
+
+        #     print("PDFs found:", pdf_links)
+
+        # # 🔧 FILTERING STRICTLY FOR QUARTER + YEAR
+        # filtered_links = []
+        # for link in pdf_links:
+        #     link_lower = link.lower()
+        #     if str(year) in link_lower and (f"q{quarter}" in link_lower or f"{quarter}" in link_lower):
+        #         filtered_links.append(link)
+
+        # # fallback if strict filter returns nothing
+        # if not filtered_links:
+        #     print("⚠ No strictly matching PDFs found for year & quarter, falling back to year-only filtering.")
+        #     for link in pdf_links:
+        #         if str(year) in link.lower():
+        #             filtered_links.append(link)
+
+        # if not filtered_links:
+        #     print("⚠ No PDFs found after filtering, using first 5 found as backup.")
+        #     filtered_links = pdf_links[:5]
+
+        # pdf_links = filtered_links
+
+        # print("✅ Final PDFs selected for extraction:")
+        # for idx, link in enumerate(pdf_links):
+        #     print(f"[PDF #{idx+1}]: {link}")
         pdf_links = []
-        generated_url = get_pdf_link(bank_name,quarter,year)
+
+# Try to get the hardcoded link first
+        generated_url = get_pdf_link(bank_name, quarter, year)
+        hardcoded_failed = False
+
         if generated_url:
-            pdf_links.append(generated_url)
-            print("Direct PDF found from hardcoded company_sources.")
-            print(f"[PDF SELECTED]: {generated_url}")
+            try:
+        # Try downloading the PDF (assuming download_pdf both downloads and validates the link)
+                downloaded_path = download_pdf(generated_url)
+                pdf_links.append(generated_url)
+                print("Direct PDF found from hardcoded company_sources.")
+                print(f"[PDF SELECTED]: {generated_url}")
+            except Exception as e:
+                print(f"Failed to download hardcoded PDF: {e}")
+                hardcoded_failed = True
         else:
+            hardcoded_failed = True
+
+# If hardcoded link failed, move on to scraping logic
+        if hardcoded_failed:
             investor_urls = find_investor_url(bank_name)
             if len(investor_urls) == 0:
                 return "Investor site not found. Please try again."
@@ -141,29 +195,30 @@ def index():
 
             print("PDFs found:", pdf_links)
 
-        # 🔧 FILTERING STRICTLY FOR QUARTER + YEAR
+# 🔧 FILTERING STRICTLY FOR QUARTER + YEAR
         filtered_links = []
         for link in pdf_links:
             link_lower = link.lower()
             if str(year) in link_lower and (f"q{quarter}" in link_lower or f"{quarter}" in link_lower):
                 filtered_links.append(link)
 
-        # fallback if strict filter returns nothing
+# fallback if strict filter returns nothing
         if not filtered_links:
-            print("⚠ No strictly matching PDFs found for year & quarter, falling back to year-only filtering.")
+            print("No strictly matching PDFs found for year & quarter, falling back to year-only filtering.")
             for link in pdf_links:
                 if str(year) in link.lower():
                     filtered_links.append(link)
 
         if not filtered_links:
-            print("⚠ No PDFs found after filtering, using first 5 found as backup.")
+            print("No PDFs found after filtering, using first 5 found as backup.")
             filtered_links = pdf_links[:5]
 
         pdf_links = filtered_links
 
-        print("✅ Final PDFs selected for extraction:")
+        print("Final PDFs selected for extraction:")
         for idx, link in enumerate(pdf_links):
             print(f"[PDF #{idx+1}]: {link}")
+
 
         # CONTEXT CREATION FROM SELECTED PDFs
         context = ""
@@ -178,19 +233,19 @@ def index():
         # Queries remain unchanged...
         queries = [
     # Total Revenue - Numeric part only
-    f"What is the total revenue reported for that particular quarter {quarter} only in year {year}? Extract only the numeric value, no units or currency, no commas. Return like: 1234.56",
+    f"What is the total revenue reported for that particular quarter {quarter} only in year {year}? Extract only the numeric value, no units or currency, no commas, provide only one value. Return like: 1234.56",
 
     # Total Revenue - Unit (millions/billions)
     f"What is the unit used for total revenue reported for quarter {quarter} in year {year}? Return only one word: millions, billions or thousands.",
 
     # Total Revenue - Currency
-    f"What is the currency used for total revenue reported for quarter {quarter} in year {year}? Return currency code only, e.g. USD, INR, EUR.",
+    f"What is the currency used for total revenue reported for quarter {quarter} in year {year}? Return currency code only and only one currency code, e.g. USD, INR, EUR.",
 
     # BFSI percentage - Numeric part only
     f"What is the percentage contribution of BFSI or Financial Segment reported for quarter {quarter} in year {year}? Extract only numeric value, return like: 23.5",
 
     # Date of publishment
-    f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return in this form only: DD/MM/YYYY",
+    f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return in this form only: DD/MM/YYYY. If no exact date available just print -",
 ]
 
 
@@ -201,7 +256,7 @@ def index():
             print(answer)
             answers.append(answer)
 
-        csv_path = 'output/data.csv'
+        csv_path = 'output/data2.csv'
         os.makedirs('output', exist_ok=True)
 
         # Always append, even if file empty
@@ -209,8 +264,8 @@ def index():
         with open(csv_path, 'a', newline='') as f:
             writer = csv.writer(f)
             if file_empty:
-                writer.writerow(["Name", "Quarter", "Year", "Total Revenue", "Unit", "Currency", "BFSI Percentile", "Date"])
-            writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2], answers[3], answers[4]])
+                writer.writerow(["Name", "Quarter", "Year", "Total Revenue", "Unit", "Currency", "BFSI Percentile", "Date","FS Revenue"])
+            writer.writerow([bank_name, quarter, year, answers[0], answers[1], answers[2], answers[3], answers[4],get_fs(answers[0],answers[1],answers[2],answers[3])])
 
 
         return send_file(csv_path, as_attachment=True)

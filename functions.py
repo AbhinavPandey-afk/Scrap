@@ -157,24 +157,64 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 import tempfile
 
-def download_pdf(pdf_url):
-    response = requests.get(pdf_url)
+# def download_pdf(pdf_url):
+#     response = requests.get(pdf_url)
+#     if response.status_code == 200:
+#         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+#         temp_file.write(response.content)
+#         temp_file.close()
+#         return temp_file.name
+#     else:
+#         raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
+def download_pdf(url, filename='presentation.pdf'):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        'Referer': url  # Some sites require this too
+    }
+    response = requests.get(url, headers=headers)
+
     if response.status_code == 200:
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-        temp_file.write(response.content)
-        temp_file.close()
-        return temp_file.name
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+        return filename
     else:
         raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
 
 
 # Load and prepare context from PDF
 def load_and_prepare_pdf(local_pdf_path):
+    from langchain_community.document_loaders import PyPDFLoader
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+    # Keywords we care about
+    relevant_keywords = [
+        'revenue', 'financials', 'total income', 'segment results',
+        'bfs', 'bfs sector', 'bfs segment', 'bfs contribution',
+        'earnings', 'EBIT', 'profit', 'operating income',
+        'quarterly performance', 'growth', 'currency', 'millions', 'billions'
+    ]
+
     loader = PyPDFLoader(local_pdf_path)
     pages = loader.load_and_split()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-    docs = splitter.split_documents(pages)
-    return "\n".join([doc.page_content for doc in docs[:5]])
+
+    # Extract pages that contain any of the relevant keywords
+    relevant_pages = []
+    for page in pages:
+        text_lower = page.page_content.lower()
+        if any(keyword in text_lower for keyword in relevant_keywords):
+            relevant_pages.append(page)
+
+    # If no relevant pages found, fallback to first 5 pages
+    if not relevant_pages:
+        relevant_pages = pages[:5]
+
+    # Now split into chunks for better context windowing
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150)
+    docs = splitter.split_documents(relevant_pages)
+
+    # Only return first few chunks (keep file size manageable for Gemini)
+    return "\n".join([doc.page_content for doc in docs[:10]])
+
 
 
 def delete_file(file_path):
@@ -274,24 +314,42 @@ def find_investor_url(bank_name):
 
 import re
 
-def get_fs(total, per):
-    curr = total[0]
+# def get_fs(total, per):
+#     curr = total[0]
     
-    # Use regex to extract the numeric part from total string
-    match = re.search(r'(\d+(\.\d+)?)', total)
-    if not match:
-        raise ValueError(f"Could not parse total revenue value: '{total}'")
-    amt = float(match.group(1))
+#     # Use regex to extract the numeric part from total string
+#     match = re.search(r'(\d+(\.\d+)?)', total)
+#     if not match:
+#         raise ValueError(f"Could not parse total revenue value: '{total}'")
+#     amt = float(match.group(1))
 
-    # Also clean up the units (e.g. "millions")
-    txt_match = re.search(r'(millions|billion|thousand)', total.lower())
-    txt = txt_match.group(1) if txt_match else 'millions'
+#     # Also clean up the units (e.g. "millions")
+#     txt_match = re.search(r'(millions|billion|thousand)', total.lower())
+#     txt = txt_match.group(1) if txt_match else 'millions'
 
-    # Extract numeric part from percent (e.g. '20 %' -> 20.0)
-    per_amt = float(re.search(r'\d+(\.\d+)?', per).group())
+#     # Extract numeric part from percent (e.g. '20 %' -> 20.0)
+#     per_amt = float(re.search(r'\d+(\.\d+)?', per).group())
 
-    fs = amt * per_amt * 0.01
-    return f"{curr}{fs} {txt}"
+#     fs = amt * per_amt * 0.01
+#     return f"{curr}{fs} {txt}"
+def get_fs(total_revenue, unit, currency, bfsi_percentile):
+    """
+    Calculate BFSI revenue based on cleaned inputs:
+    - total_revenue: numeric value (float or int)
+    - unit: string ("millions", "billions", etc.)
+    - currency: string ("USD", "INR", etc.)
+    - bfsi_percentile: numeric value (float or int)
+    """
+    
+    # Ensure all values are floats
+    amt = float(total_revenue)
+    per_amt = float(bfsi_percentile)
+
+    # Calculate BFSI revenue
+    bfsirev = amt * per_amt * 0.01
+
+    return f"{currency}{bfsirev} {unit}"
+
 """IF ELSE"""
 # # Add this to your functions.py
 # def generate_quarterly_url(company, fy, quarter):
@@ -410,8 +468,8 @@ def get_pdf_link(company, quar, year):
         "mphasis": f"https://www.mphasis.com/content/dam/mphasis-com/global/en/investors/financial-results/{year}/q{quar}-earnings-press-release.pdf",
         "birlasoft": f"https://www.birlasoft.com/sites/default/files/resources/downloads/investors/investor-update/q{quar}-fy{yy}-investor-update.pdf",
         "coforge": f"https://www.coforge.com/hubfs/Fact-Sheet-Q{quar}FY{yy}.pdf",
-        "zensar": f"https://www.zensar.com/about/investors/",  # No PDF link provided
-        "persistent systems": f"https://www.persistent.com/investors/quarterly-results/"
+        "zensar": f"https://www.zensar.com/sites/default/files/investor/analyst-meet/Zensar-Analyst-Presentation-Q{quar}FY{yy}.pdf",  # No PDF link provided
+        "persistent systems": f"https://www.persistent.com/wp-content/uploads/2025/04/analyst-presentation-and-factsheet-q4fy25.pdf"
     }
 
     try:

@@ -1,73 +1,64 @@
-Name,Quarter,Year,Total Revenue,Unit,Currency,BFSI Percentile,Date
-Wipro,4,2025,"225.0
-","billions
-","INR
-","I am sorry, but the provided document does not contain any information about the percentage contribution of the BFSI (Banking, Financial Services, and Insurance) or financial segment for quarter 4 of 2025.
-","16/04/2025
-"
-TCS,4,2025,"2.5
-","billions
+Name,Quarter,Year,Total Revenue,Unit,Currency,BFSI Percentile,Date,FS Revenue
+Wipro,4,2025,"2625.9
+","Billions
 ","USD
-",4,"10/04/2025
+","34.0
+",31-03-2025,"USD
+892.806 Billions
+"
+TCS,4,2025,644790,"Millions
+","INR
+","31.2
+",--,"INR
+201174.48 Millions
 "
 Infosys,4,2025,"4730
 ","millions
-","INR
-",28.4,"17/04/2025
-"
-Capgemini,1,2025,"5553
-","millions
-","EUR
-","The provided text does not contain the percentage contribution of the BFSI or Financial Segment for quarter 1 in year 2025.
-","29/04/2025
-"
-Capgemini,1,2025,"5553
-","millions
-","EUR
-","0.0
-","29/04/2025
-"
-Cognizant,1,2025,"Okay, I understand. I will only extract the numeric value of the total revenue reported for quarter 1 of 2025, without any units, currency symbols, or commas. The output will be in the format 1234.56.
-","Based on standard financial reporting conventions, the unit used for total revenue is likely **millions**.
-","I need the financial report to answer this question. I am unable to extract the currency code for total revenue reported for quarter 1 in year 2025 without the document.
-","Okay, I understand. I will focus on extracting only the numeric percentage contribution of the BFSI or Financial Segment for Q1 2025.
-","This question cannot be answered from the provided context, as there is no mention of any conference dates or publications.
-"
-Techmahindra,4,2025,1549,"Millions
 ","USD
-","16.7
-",There is no date of publishment in the text.
-LTIMindTree,4,2025,"Okay, I understand. I will focus on extracting the numeric value for total revenue reported for quarter 4 of the year 2025, without any units, currency symbols, commas, or other formatting.
-","This question cannot be answered without additional context. Please provide the relevant financial report or data.
-","I am designed to extract numerical data. I cannot determine the currency code without access to the financial report.
-","Okay, I understand. I will focus on extracting the precise numerical percentage contribution of the BFSI or Financial Segment for Quarter 4 of 2025.
-","I am unable to answer the question as there is no context provided from which to extract the date.
+","28.4
+","DD/MM/YYYY
+","USD
+1343.32 millions
 "
-ltimindtree,4,2025,"Okay, I'm ready. I will await the text and extract the revenue for Q4 2025 as a number without units, currency symbols, or commas.
-","Please provide the financial report so I can determine the unit used for total revenue reported for quarter 4 in year 2025.
-","I need the context of a financial report to answer this question. Please provide the financial report.
-","Response: 24.2
-","This question cannot be answered from the context provided. I need the context to find the date.
-"
-mphasis,4,2025,"I am sorry, but I cannot answer this question as the document does not contain any information about total revenue.","The document provided does not include any specific numerical data regarding total revenue. Therefore, I cannot determine the units (millions, billions, or thousands) used for reporting revenue in Q4 FY2025.
-","Based on the documents provided, I am unable to identify the currency used for total revenue reported for quarter 4 in year 2025.
-","I am sorry, but the provided text does not contain the percentage contribution of BFSI or Financial Segment reported for quarter 4 in year 2025.","25/04/2025
-"
-TCS,4,2025,"2.  5
+Accenture,2,2025,"16.66
 ","billions
 ","USD
-",4,"10/04/2025
+","18.1
+",20-03-2025,"USD
+3.0154600000000005 billions
 "
-TCS,4,2025,"2.5
-","Billions
+Cognizant,1,2025,5115,"millions
 ","USD
-","4
-","10/04/2025
+","28.6
+",-,"USD
+1462.89 millions
 "
-TCS,4,2025,"I am sorry, but I am unable to answer your question, as the provided text does not contain any information about total revenue.
-","The provided text does not contain any numerical data or units for total revenue. Therefore, I cannot answer the question.
-","This document does not contain the currency used for total revenue reported for quarter 4 in year 2025.
-Answer: Unable to extract.
-","This document does not contain the percentage contribution of BFSI or Financial Segment reported for quarter 4 in year 2025.
-","10/04/2025
+Techmahindra,4,2025,"1548.8
+","millions
+","USD
+","16.7
+",-,"USD
+258.6496 millions
+"
+ltimindtree,4,2025,"1131.0
+","Millions
+","INR
+","37.1
+",23-04-2025,"INR
+419.601 Millions
+"
+birlasoft,4,2025,"152.2
+","Millions
+","INR
+","24.0
+","28/05/2025
+","INR
+36.528 Millions
+"
+zensar,4,2025,"156.8
+","millions
+","USD
+","41.0
+",31-Mar-25,"USD
+64.288 millions
 "
