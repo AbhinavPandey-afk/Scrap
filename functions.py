@@ -382,6 +382,7 @@ def get_pdf_link(company, quar, year):
         "techmahindra": f"https://insights.techmahindra.com/investors/tml-q{quar}-fy-{yy}-fact-sheet.pdf",
         "ltimindtree": f"https://www.ltimindtree.com/wp-content/uploads/{year}/04/earnings-release-factsheet-q{quar}fy{yy}.pdf",
         "mphasis": f"https://www.mphasis.com/content/dam/mphasis-com/global/en/investors/financial-results/{year}/mphasis-earnings-call-presentation-q{quar}-{year}.pdf",
+        #"mphasis": f"https://www.mphasis.com/content/dam/mphasis-com/global/en/investors/financial-results/{year}/q{quar}-financial-results.pdf",
         "birlasoft": f"https://www.birlasoft.com/sites/default/files/resources/downloads/investors/investor-update/q{quar}-fy{yy}-investor-update.pdf",
         "coforge": f"https://www.coforge.com/investors/quarter-reports",
         "zensar": f"https://www.zensar.com/sites/default/files/investor/analyst-meet/Zensar-Analyst-Presentation-Q{quar}FY{yy}.pdf",  # No PDF link provided

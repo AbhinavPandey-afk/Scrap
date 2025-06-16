@@ -125,8 +125,10 @@ def index():
         if bank_name.lower() == 'mphasis':
             queries = [
                 f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
-                f"What is the revenue of Banking and Financial Services for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
-                f"What is the revenue of Insurance services for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
+                #f"What is the revenue of Banking and Financial Services for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
+                # f"What is the revenue of 'Insurance' for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
+                f"Fetch Banking & Financial Services Revenue for quarter {quarter} in year {year}.Only numeric revenue in millions, no extra text, no currency.",
+                f"Fetch 'Insurance' Revenue for quarter {quarter} in year {year}.Insurance revenue is just below Banking & Financial Services Revenue.Only numeric revenue in millions, no extra text, no currency."
                 f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
             ]
 
@@ -154,7 +156,8 @@ def index():
         elif bank_name.lower() == 'persistent systems':
             queries = [
                 f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
-                f"What is the revenue of BFSI (Banking Financial Services and Insurance) segment for quarter {quarter} year {year}.? Only numeric revenue in millions, no extra text, no currency.",
+                # f"What is the revenue of BFSI (Banking Financial Services and Insurance) segment for quarter {quarter} year {year}.? Only numeric revenue in millions, no extra text, no currency.",
+                f"On the Quarterly Revenue ($M) slide, fetch the Banking, Financial Services & Insurance revenue for {quarter} FY{year}",
                 f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
             ]
 
@@ -181,7 +184,7 @@ def index():
         elif bank_name.lower() == 'capgemini':
             queries = [
         f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in €xyz (don't use commas in between) millions always print millions, no extra information needed.",
-        f"Extract ONLY revenue share percentage (out of 100%) for Financial Services. This is sector contribution to revenue for quarter {quarter} {year}. DO NOT return growth %. Only return numeric percentage value like: 21.0",
+        f"On Revenues by Sector, Fetch Financial Services in % of quarter {quarter} year {year}. DO NOT return growth %. Only return numeric percentage value like: 21.0",
 
         f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
             ]
