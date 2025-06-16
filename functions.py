@@ -156,16 +156,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 import tempfile
-
-# def download_pdf(pdf_url):
-#     response = requests.get(pdf_url)
-#     if response.status_code == 200:
-#         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-#         temp_file.write(response.content)
-#         temp_file.close()
-#         return temp_file.name
-#     else:
-#         raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
 def download_pdf(url, filename='presentation.pdf'):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
@@ -334,7 +324,46 @@ def get_fs(total_revenue, unit, currency, bfsi_percentile):
     bfsirev = amt * per_amt * 0.01
 
     return f"{currency}{bfsirev} {unit}"
+"""CapGemini"""
+def get_capgemini_presentation(year, quarter):
 
+    # Convert quarter and year to URL format
+    fiscal_url = f"https://investors.capgemini.com/en/financial-results/?fiscal-year={year}"
+    
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    try:
+        driver.get(fiscal_url)
+        time.sleep(3)
+
+        # Find all blocks for that fiscal year
+        presentations = driver.find_elements(By.XPATH, "//a[contains(text(), 'Download') and contains(@href, 'Presentation')]")
+        
+        if not presentations:
+            # fallback: Capgemini uses "Download" with size instead of "Presentation"
+            presentations = driver.find_elements(By.XPATH, "//a[contains(text(),'Download') and contains(@href,'.pdf') and contains(@href,'financial-results')]")
+
+        for link in presentations:
+            href = link.get_attribute("href")
+            # Heuristic filtering:
+            if f"Q{quarter}" in href:
+                driver.quit()
+                return href
+
+        driver.quit()
+        print("Presentation not found for given quarter.")
+        return None
+
+    except Exception as e:
+        driver.quit()
+        print("Error fetching Capgemini presentation:", e)
+        return None
 
 import requests
 
@@ -348,13 +377,13 @@ def get_pdf_link(company, quar, year):
         "tcs": f"https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/{year-1}-{yy}/q{quar}/Presentations/Q{quar}%20{year-1}-{yy}%20Fact%20Sheet.pdf",
         "infosys": f"https://www.infosys.com/investors/reports-filings/quarterly-results/{year-1}-{year}/q{quar}/documents/fact-sheet.pdf",
         "accenture": f"https://investor.accenture.com/~/media/Files/A/Accenture-IR-V3/quarterly-earnings/{year}/q{quar}fy{yy}/accentures-{['first','second','third','fourth'][quar-1]}-quarter-fiscal-{year}-earnings-release.pdf",
-        "capgemini": f"https://investors.capgemini.com/en/financial-results/{year}/Q{quar}/download.pdf",
+        "capgemini": get_capgemini_presentation(year, quar),
         "cognizant": f"https://cognizant.q4cdn.com/123993165/files/doc_earnings/{year}/q{quar}/presentation/Q{quar}{yy}-Earnings-Supplement.pdf",
         "techmahindra": f"https://insights.techmahindra.com/investors/tml-q{quar}-fy-{yy}-fact-sheet.pdf",
         "ltimindtree": f"https://www.ltimindtree.com/wp-content/uploads/{year}/04/earnings-release-factsheet-q{quar}fy{yy}.pdf",
-        "mphasis": f"https://www.mphasis.com/content/dam/mphasis-com/global/en/investors/financial-results/{year}/q{quar}-earnings-press-release.pdf",
+        "mphasis": f"https://www.mphasis.com/content/dam/mphasis-com/global/en/investors/financial-results/{year}/mphasis-earnings-call-presentation-q{quar}-{year}.pdf",
         "birlasoft": f"https://www.birlasoft.com/sites/default/files/resources/downloads/investors/investor-update/q{quar}-fy{yy}-investor-update.pdf",
-        "coforge": f"https://www.coforge.com/hubfs/Fact-Sheet-Q{quar}FY{yy}.pdf",
+        "coforge": f"https://www.coforge.com/investors/quarter-reports",
         "zensar": f"https://www.zensar.com/sites/default/files/investor/analyst-meet/Zensar-Analyst-Presentation-Q{quar}FY{yy}.pdf",  # No PDF link provided
         # "persistent systems": f"https://www.persistent.com/wp-content/uploads/2025/04/analyst-presentation-and-factsheet-q4fy25.pdf"
     }
@@ -366,7 +395,13 @@ def get_pdf_link(company, quar, year):
         company_sources["persistent systems"] = f"https://www.persistent.com/wp-content/uploads/{year-1}/10/analyst-presentation-and-factsheet-q2fy{yy}.pdf"
     else:
         company_sources["persistent systems"] = f"https://www.persistent.com/wp-content/uploads/{year-1}/07/analyst-presentation-and-factsheet-q1fy{yy}.pdf"
-
+    if company.lower()=="coforge":
+        l=find_presentation_pdf(company_sources["coforge"])
+        l2=[]
+        for i in l:
+            if (("Q"+str(quar)) in i) & (yy in i) & ("fact" in i.lower()) & ("sheet" in i.lower()):
+                l2.append(i)
+        return l2[-1]
     try:
         return company_sources[company.lower()]
     except Exception as e:
@@ -393,6 +428,20 @@ def process_file(file_path):
     else:
         print("❌ Unknown file type. Skipping.")
         return ""
+# functions.py
 
+def combine_bfsi_revenues(bfs_value, insurance_value):
+    """
+    Combine BFS and Insurance revenues. Handles cases where any value might be missing.
+    """
+    try:
+        bfs = float(bfs_value)
+    except:
+        bfs = 0.0
 
+    try:
+        ins = float(insurance_value)
+    except:
+        ins = 0.0
 
+    return bfs + ins
