@@ -53,7 +53,7 @@ def index():
         bank_name = request.form['bank']
         quarter = int(request.form['quarter'])
         year = int(request.form['year'])
-
+        yy = str(year)[-2:]
         fy = f"{year-1}-{year}"
         prev_q = quarter - 1
         prev_y = year
@@ -124,12 +124,27 @@ def index():
         # Mphasis special queries
         if bank_name.lower() == 'mphasis':
             queries = [
-                f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
-                #f"What is the revenue of Banking and Financial Services for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
-                # f"What is the revenue of 'Insurance' for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
-                f"Fetch Banking & Financial Services Revenue for quarter {quarter} in year {year}.Only numeric revenue in millions, no extra text, no currency.",
-                f"Fetch 'Insurance' Revenue for quarter {quarter} in year {year}.Insurance revenue is just below Banking & Financial Services Revenue.Only numeric revenue in millions, no extra text, no currency."
-                f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
+                # f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
+                # #f"What is the revenue of Banking and Financial Services for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
+                # # f"What is the revenue of 'Insurance' for quarter {quarter} year {year}? Only numeric revenue in millions, no extra text, no currency.",
+                # f"Fetch Banking & Financial Services Revenue for quarter {quarter} in year {year}.Only numeric revenue in millions, no extra text, no currency.",
+                # f"Fetch 'Insurance' Revenue for quarter {quarter} in year {year}.Insurance revenue is just below Banking & Financial Services Revenue.Only numeric revenue in millions, no extra text, no currency."
+                # f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
+                f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz millions. No commas, no extra information.",
+f"What is the revenue of the Banking and Financial Services vertical for quarter {quarter} in year {year}? Only numeric revenue in millions, no currency, no extra text.",
+f"What is the revenue of the Insurance vertical for quarter {quarter} in year {year}? Only numeric revenue in millions, no extra text, no currency.",
+f"What is the publish date of the quarterly report for Q{quarter} FY{year}? Return only in DD/MM/YYYY format.",
+
+
+    # "What is the total revenue reported for Q{quarter} FY{yy}? Provide only the value in this exact format: in $xyz millions, no commas, no decimals, no additional text.",
+
+    # "What is the revenue from the Banking and Financial Services (BFS) segment for Q{quarter} FY{yy}? Provide only the numeric value in millions, no currency symbols, no extra text.",
+
+    # "What is the revenue from the Insurance segment for Q{quarter} FY{yy}? The Insurance value appears under 'Q{quarter}FY{yy} Performance by Vertical' and is located below BFS. Provide only the numeric value in millions, no extra text, no currency symbols.",
+
+    # "What is the published date of the Q{quarter} FY{yy} earnings report? Return only in DD/MM/YYYY format."
+
+
             ]
 
             answers = []
@@ -155,10 +170,17 @@ def index():
         #Persistent
         elif bank_name.lower() == 'persistent systems':
             queries = [
-                f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
-                # f"What is the revenue of BFSI (Banking Financial Services and Insurance) segment for quarter {quarter} year {year}.? Only numeric revenue in millions, no extra text, no currency.",
-                f"On the Quarterly Revenue ($M) slide, fetch the Banking, Financial Services & Insurance revenue for {quarter} FY{year}",
-                f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
+                # f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
+                # # f"What is the revenue of BFSI (Banking Financial Services and Insurance) segment for quarter {quarter} year {year}.? Only numeric revenue in millions, no extra text, no currency.",
+                # f"On the Quarterly Revenue ($M) slide, fetch the Banking, Financial Services & Insurance revenue for {quarter} FY{year}",
+                # f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
+        
+  "From the Persistent Systems Q4 FY25 analyst presentation, what is the total revenue reported for Q4 of FY25? Look at the slides titled 'Quarterly Revenue ($M)', 'Financial Highlights', or 'Fact Sheet'. Return only the exact value in this format: in $XYZ.X millions — no commas, symbols, or text outside the pattern.",
+
+  "What is the total revenue from the Banking, Financial Services, and Insurance (BFSI) segment for Q4 FY25? You will find it under the heading 'Quarterly Revenue ($M)' by segment on the same page that lists Software, Hi-Tech & Emerging Industries and Healthcare. Return only the numeric revenue in millions with one decimal precision — no text, currency symbol, or additional commentary.",
+
+  "What is the publish date of the Q4 FY25 report or investor presentation? Check the first 2–3 slides where the header shows a copyright year or presentation month. Return the exact date in DD/MM/YYYY format only, without any extra text."
+
             ]
 
             answers = []
@@ -210,7 +232,7 @@ def index():
 
         else:
             queries = [
-                f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz (don't use commas in between) millions always print millions, no extra information needed.",
+                f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form- $xyz (don't use commas in between) millions always print millions, no extra information needed.",
                 f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. 20.0, no extra information needed. Return value like: PERCENTAGE: 23.5",
                 f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return in this form only - DD/MM/YYYY format no extra information needed."
             ]
@@ -240,7 +262,7 @@ def index():
                 fs_revenue = float(bfs_raw)
                 bfs_percent_to_store = "-"
 
-        csv_path = 'output/data3.csv'
+        csv_path = 'output/data5.csv'
         os.makedirs('output', exist_ok=True)
         file_empty = not os.path.isfile(csv_path) or os.stat(csv_path).st_size == 0
 
