@@ -7,9 +7,7 @@ urllib3
 langchain
 langchain-community
 tqdm
-gunicorn
 flask
 PyPDF2 
 transformers 
-torch
 google-generativeai
