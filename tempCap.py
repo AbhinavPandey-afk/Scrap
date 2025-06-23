@@ -131,7 +131,7 @@ def index():
                 # f"Fetch 'Insurance' Revenue for quarter {quarter} in year {year}.Insurance revenue is just below Banking & Financial Services Revenue.Only numeric revenue in millions, no extra text, no currency."
                 # f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return only in DD/MM/YYYY format."
                 f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form - in $xyz millions. No commas, no extra information.",
-f"What is the revenue of the Banking and Financial Services vertical for quarter {quarter} in year {year}? Only numeric revenue in millions, no currency, no extra text.",
+                f"What is the revenue of the Banking and Financial Services vertical for quarter {quarter} in year {year}? Only numeric revenue in millions, no currency, no extra text.",
 f"What is the revenue of the Insurance vertical for quarter {quarter} in year {year}? Only numeric revenue in millions, no extra text, no currency.",
 f"What is the publish date of the quarterly report for Q{quarter} FY{year}? Return only in DD/MM/YYYY format.",
 
@@ -228,12 +228,72 @@ f"What is the publish date of the quarterly report for Q{quarter} FY{year}? Retu
             fs_revenue = total_revenue * bfs_percentage / 100
             bfs_percent_to_store = bfs_percentage
 
+        elif bank_name.lower() == 'wipro':
+    #         queries = [
+    #     # f"What is the total revenue reported by Wipro for quarter {quarter} in year {year}? Return the exact value only in this format: in $XYZ.X millions — no commas, symbols, or extra text.",
+    #     # f"What is the revenue from the BFSI (Banking, Financial Services, and Insurance) segment for Wipro in quarter {quarter} year {year}? Return only the numeric revenue in millions. No text, no currency symbols, just the number.",
+    #     # f"What is the publish date of Wipro's quarterly report or analyst presentation for quarter {quarter} in year {year}? Return the date only in DD/MM/YYYY format. No extra text."
+
+    # ]
+            queries = [
+    f"What is the total revenue reported by Wipro for Q4 FY{year}? Refer to the 'Results for the Quarter and Year ended March 31, {year}' or IT Services Revenues section. Return only the value in the format: in $XYZ.X millions — no commas, no extra text.",
+    f"What percentage of Wipro's total revenue in Q4 FY{year} came from the Banking, Financial Services and Insurance (BFSI) sector? Refer to the Sector Mix table. Return only the number like: 34.3 — no percent symbol, no text.",
+    f"What is the publish date of Wipro's Q4 FY{year} earnings report? Refer to the top of the report. Return the date only in DD/MM/YYYY format."
+]
+
+
+            answers = []
+            for query in queries:
+                answer = query_gemini(query, context)
+                print(answer)
+                answers.append(answer)
+
+            total_revenue_raw = answers[0]
+            match = re.search(r'[\d,]+(?:\.\d+)?', total_revenue_raw)
+            total_revenue = float(match.group().replace(',', '')) if match else 0.0
+
+            try:
+                fs_revenue = float(answers[1])
+                bfs_percent_to_store = "-"
+            except ValueError:
+                try:
+                    bfs_percentage = float(answers[1])
+                    fs_revenue = total_revenue * bfs_percentage / 100
+                    bfs_percent_to_store = bfs_percentage
+                except:
+                    fs_revenue = "-"
+                    bfs_percent_to_store = "-"
+
+        elif bank_name.lower() == 'cognizant':
+            queries = [
+        f"What is the total revenue reported by Cognizant for quarter {quarter} of fiscal year {year}? Refer to the Results Summary or Revenue section. Return only the value in this format: in $XXXX.X millions — no commas, no extra text or symbols.",
+        f"What is the revenue reported by Cognizant from the Financial Services segment in quarter {quarter} of fiscal year {year}? Refer to the Revenue by Segment section. Return only the value in millions, no text or currency symbols.",
+        f"What is the publish date of Cognizant’s earnings report for quarter {quarter} of fiscal year {year}? Return only in DD/MM/YYYY format."
+    ]
+
+            answers = []
+            for query in queries:
+                answer = query_gemini(query, context)
+                print(answer)
+                answers.append(answer)
+
+            total_revenue_raw = answers[0]
+            match = re.search(r'[\d,]+(?:\.\d+)?', total_revenue_raw)
+            total_revenue = float(match.group().replace(',', '')) if match else 0.0
+
+            try:
+                fs_revenue = float(answers[1])
+                bfs_percent_to_store = "-"
+            except:
+                fs_revenue = "-"
+                bfs_percent_to_store = "-"
+
     # Don't forget to adapt currency column as "EUR" while writing CSV
 
         else:
             queries = [
                 f"What is the total revenue reported for quarter {quarter} in year {year}? Provide exact value only in the form- $xyz (don't use commas in between) millions always print millions, no extra information needed.",
-                f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year}? Provide exact value only in the form - e.g. 20.0, no extra information needed. Return value like: PERCENTAGE: 23.5",
+                f"What is the percentage of contribution of BFSI or Financial Segment or Sector reported for quarter {quarter} in year {year}? No extra information needed. Always Return value like: PERCENTAGE: 23.5",
                 f"What is the date of publishment of conference of quarter {quarter} in year {year}? Return in this form only - DD/MM/YYYY format no extra information needed."
             ]
 

@@ -1,25 +1,25 @@
 Name,Quarter,Year,Total Revenue,Unit,Currency,BFSI Percentile,Date,FS Revenue
-Wipro,4,2025,2625.9,millions,USD,34.0,"31/03/2025
+Wipro,4,2025,2625.9,millions,USD,34,"31/03/2025
 ",892.806
-TCS,4,2025,7465.0,millions,USD,-,"00/00/0000
-",31.2
-Infosys,4,2025,4730.0,millions,USD,28.4,"31/03/2025
+Infosys,4,2025,4730,millions,USD,28.4,"31/03/2025
 ",1343.32
-Accenture,2,2025,16660.0,millions,USD,18.1,"20/03/2025
+Accenture,2,2025,16660,millions,USD,18.1,"20/03/2025
 ",3015.46
-Capgemini,1,2025,5553.0,millions,USD,2.0,29/04/2025,111.06
-Cognizant,1,2025,5115.0,millions,USD,5.6,"01/01/2025
-",286.44
-Techmahindra,4,2025,1549.0,millions,USD,16.7,01/01/2025,258.683
-ltimindtree,4,2025,1131.0,millions,USD,37.1,"23/04/2025
+Techmahindra,4,2025,1549,millions,USD,16.7,01-01-2025,258.683
+ltimindtree,4,2025,1131,millions,USD,37.1,"23/04/2025
 ",419.601
-mphasis,4,2025,430.0,millions,USD,-,"24/04/2025
-",262.0
-birlasoft,4,2025,152.2,millions,USD,-,"28/05/2025
-",24.0
-coforge,4,2025,410.0,millions,USD,30.2,"N/A
+mphasis,4,2025,430,millions,USD,-,"24/04/2025
+",262
+coforge,4,2025,410,millions,USD,30.2,"N/A
 ",123.82
-zensar,4,2025,156.8,millions,USD,41.0,"N/A
+zensar,4,2025,156.8,millions,USD,41,"N/A
 ",64.288
 persistent systems,4,2025,375.2,millions,USD,-,"N/A
 ",71.2
+TCS,4,2025,7465,millions,USD,31.2,"There is no explicit date of publishment mentioned in the document.
+",2329.08
+birlasoft,4,2025,152.2,millions,USD,24,"28/05/2025
+",36.528
+Capgemini,1,2025,5553,millions,USD,21,29-04-2025,1166.13
+Cognizant,1,2025,5115,millions,USD,-,"There is no explicit publish date of Cognizant’s earnings report for quarter 1 of fiscal year 2025 within the provided text.
+",1462
