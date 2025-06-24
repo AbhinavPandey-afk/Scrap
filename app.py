@@ -288,6 +288,36 @@ f"What is the publish date of the quarterly report for Q{quarter} FY{year}? Retu
                 fs_revenue = "-"
                 bfs_percent_to_store = "-"
 
+        elif bank_name.lower() == 'coforge':
+            queries = [
+        f"What is the total revenue reported by Coforge for quarter {quarter} of fiscal year {year}? Refer to the Financials or Revenue section. Return only the value in this format: in $XXXX.X millions — no commas, no extra text or symbols.",
+        f"What percentage of Coforge's revenue came from the Banking and Financial Services (BFS) segment in Q{quarter} FY{year}? Look for 'Vertical' revenue mix table. Return only the number like: 30.2 — no percent sign or text.",
+        f"What percentage of Coforge's revenue came from the Insurance segment in Q{quarter} FY{year}? Look in the same vertical mix. Return only the number like: 18.2 — no percent sign or text.",
+        f"What is the publish date of Coforge’s earnings report for quarter {quarter} of fiscal year {year}? Return only in DD/MM/YYYY format."
+    ]
+
+            answers = []
+            for query in queries:
+                answer = query_gemini(query, context)
+                print(answer)
+                answers.append(answer)
+
+    # Extract total revenue
+            total_revenue_raw = answers[0]
+            match = re.search(r'[\d,]+(?:\.\d+)?', total_revenue_raw)
+            total_revenue = float(match.group().replace(',', '')) if match else 0.0
+
+    # Extract BFS and Insurance percentages and combine
+            try:
+                bfs_percent = float(answers[1])
+                insurance_percent = float(answers[2])
+                bfs_percent_to_store = round(bfs_percent + insurance_percent, 1)
+                fs_revenue = total_revenue * bfs_percent_to_store / 100
+            except:
+                bfs_percent_to_store = "-"
+                fs_revenue = "-"
+
+
     # Don't forget to adapt currency column as "EUR" while writing CSV
 
         else:
