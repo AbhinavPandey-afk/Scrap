@@ -330,7 +330,13 @@ f"What is the publish date of the quarterly report for Q{quarter} FY{year}? Retu
             writer = csv.writer(f)
             if file_empty:
                 writer.writerow(["Name", "Quarter", "Year", "Total Revenue", "Unit", "Currency", "BFSI Percentile", "Date", "FS Revenue"])
-            writer.writerow([
+            if(bank_name.lower()=="capgemini"):
+                writer.writerow([
+                bank_name, quarter, year, total_revenue, "millions", "Euro",
+                bfs_percent_to_store, answers[-1], fs_revenue
+            ])
+            else:
+                writer.writerow([
                 bank_name, quarter, year, total_revenue, "millions", "USD",
                 bfs_percent_to_store, answers[-1], fs_revenue
             ])
