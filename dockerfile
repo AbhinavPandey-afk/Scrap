@@ -2,10 +2,11 @@ FROM python:3.11-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Chromium + required libraries
+# Install required dependencies and Chrome
 RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-driver \
+    wget \
+    curl \
+    gnupg \
     fonts-liberation \
     libnss3 \
     libxss1 \
@@ -21,25 +22,18 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libasound2 \
     xdg-utils \
-    wget \
-    unzip \
-    curl \
-    gnupg \
     --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt install -y ./google-chrome-stable_current_amd64.deb && \
+    rm google-chrome-stable_current_amd64.deb
 
-# Set Chromium binary explicitly
-ENV GOOGLE_CHROME_BIN=/usr/bin/chromium
-ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+RUN google-chrome --version  # Optional: for debug logs
 
-# Set working directory
+ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome
+
 WORKDIR /app
-
 COPY . .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
-
 CMD ["python", "app.py"]

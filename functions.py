@@ -326,7 +326,8 @@ def get_fs(total_revenue, unit, currency, bfsi_percentile):
     return f"{currency}{bfsirev} {unit}"
 """CapGemini"""
 def get_capgemini_presentation(year, quarter):
-
+    import shutil
+    import platform
     # Convert quarter and year to URL format
     fiscal_url = f"https://investors.capgemini.com/en/financial-results/?fiscal-year={year}"
     
@@ -335,7 +336,27 @@ def get_capgemini_presentation(year, quarter):
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+    # options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+    chrome_path = (
+    shutil.which("google-chrome") or
+    shutil.which("chrome") or
+    shutil.which("chrome.exe")
+)
+
+    if not chrome_path:
+        if platform.system() == "Windows":
+            chrome_path = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        else:
+            chrome_path = "/usr/bin/google-chrome"
+
+
+    options.binary_location = chrome_path
+
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=options
+    )   
+
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     try:
