@@ -11,3 +11,4 @@ flask
 PyPDF2 
 transformers 
 google-generativeai
+chromium
