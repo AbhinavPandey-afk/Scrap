@@ -1,7 +1,9 @@
+# Use Python 3.11 slim image
 FROM python:3.11-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install system dependencies and distutils
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -26,10 +28,28 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Google Chrome manually
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y ./google-chrome-stable_current_amd64.deb && \
+    rm google-chrome-stable_current_amd64.deb
+
+# Optional: Confirm Chrome install in logs
+RUN google-chrome --version
+
+# Set environment variable for Chrome path (used by Selenium)
+ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome
+
+# Set app directory
 WORKDIR /app
+
+# Copy project files
 COPY . .
 
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Expose the default Flask port
 EXPOSE 5000
+
+# Start Flask app
 CMD ["python", "app.py"]
