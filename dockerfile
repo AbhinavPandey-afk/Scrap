@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     gnupg \
+    python3-distutils \
     fonts-liberation \
     libnss3 \
     libxss1 \
