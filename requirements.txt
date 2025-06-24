@@ -14,4 +14,3 @@ google-generativeai
 chromium
 gunicorn
 undetected_chromedriver
-distutils
