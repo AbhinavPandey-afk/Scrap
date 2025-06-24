@@ -13,3 +13,4 @@ transformers
 google-generativeai
 chromium
 gunicorn
+undetected_chromedriver
