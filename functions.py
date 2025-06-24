@@ -325,19 +325,22 @@ def get_fs(total_revenue, unit, currency, bfsi_percentile):
 
     return f"{currency}{bfsirev} {unit}"
 """CapGemini"""
-import undetected_chromedriver as uc
 def get_capgemini_presentation(year, quarter):
     from selenium.webdriver.common.by import By
     import time
     # Convert quarter and year to URL format
     fiscal_url = f"https://investors.capgemini.com/en/financial-results/?fiscal-year={year}"
     
-    options = uc.ChromeOptions()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.binary_location = "/usr/bin/google-chrome"
 
-    driver = uc.Chrome(options=options)
+    driver = webdriver.Chrome(
+    service=Service("/usr/local/bin/chromedriver"),
+    options=options
+)
 
     try:
         driver.get(fiscal_url)

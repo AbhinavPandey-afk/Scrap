@@ -1,14 +1,13 @@
-FROM python:3.11-slim 
+FROM python:3.11-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install all system dependencies + distutils
+# Install dependencies and Chrome
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
     unzip \
     gnupg \
-    python3-distutils \
     fonts-liberation \
     libnss3 \
     libxss1 \
@@ -32,20 +31,22 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
     apt install -y ./google-chrome-stable_current_amd64.deb && \
     rm ./google-chrome-stable_current_amd64.deb
 
-# Optional: print installed Chrome version to build logs
-RUN google-chrome --version
+# Install ChromeDriver (matching version manually)
+RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+') && \
+    CHROMEDRIVER_VERSION=$(curl -sS \"https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}\") && \
+    wget -O /tmp/chromedriver.zip \"https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip\" && \
+    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/chromedriver && \
+    rm /tmp/chromedriver.zip
 
-# Tell Selenium where Chrome is
+ENV PATH=\"/usr/local/bin:$PATH\"
 ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome
+ENV CHROMEDRIVER_PATH=/usr/local/bin/chromedriver
 
-# App code location
 WORKDIR /app
-
-# Copy source files
 COPY . .
 
-# Install Python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
-CMD ["python", "app.py"]
+CMD [\"python\", \"app.py\"]
