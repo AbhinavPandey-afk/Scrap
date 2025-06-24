@@ -1,15 +1,13 @@
-# Use a lightweight Python image
 FROM python:3.11-slim
 
-# Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies and add Google Chrome repo
+# Install required system packages
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
-    gnupg \
     unzip \
+    gnupg \
     fonts-liberation \
     libnss3 \
     libxss1 \
@@ -27,28 +25,28 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     --no-install-recommends
 
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable
+# Download and install Google Chrome manually
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y ./google-chrome-stable_current_amd64.deb && \
+    rm google-chrome-stable_current_amd64.deb
 
-# Debug: check Chrome version in build logs
+# Confirm Chrome is installed
 RUN google-chrome --version
 
-# Set environment variable used by Selenium
+# Set Chrome binary path explicitly
 ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome
 
 # Set working directory
 WORKDIR /app
 
-# Copy all app code
+# Copy source files
 COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port used by Flask
+# Expose the Flask port
 EXPOSE 5000
 
-# Start the Flask app
+# Run the Flask app
 CMD ["python", "app.py"]
