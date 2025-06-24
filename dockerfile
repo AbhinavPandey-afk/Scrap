@@ -2,12 +2,10 @@ FROM python:3.11-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required system packages
+# Install Chromium + required libraries
 RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    unzip \
-    gnupg \
+    chromium \
+    chromium-driver \
     fonts-liberation \
     libnss3 \
     libxss1 \
@@ -23,30 +21,25 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libasound2 \
     xdg-utils \
-    --no-install-recommends
+    wget \
+    unzip \
+    curl \
+    gnupg \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-# Download and install Google Chrome manually
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    apt-get install -y ./google-chrome-stable_current_amd64.deb && \
-    rm google-chrome-stable_current_amd64.deb
-
-# Confirm Chrome is installed
-RUN google-chrome --version
-
-# Set Chrome binary path explicitly
-ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome
+# Set Chromium binary explicitly
+ENV GOOGLE_CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 # Set working directory
 WORKDIR /app
 
-# Copy source files
 COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the Flask port
 EXPOSE 5000
 
-# Run the Flask app
 CMD ["python", "app.py"]
