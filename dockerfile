@@ -1,15 +1,15 @@
-# Use Python 3.11 slim image
+# Use a lightweight Python image
 FROM python:3.11-slim
 
-# Avoid interaction during package install
+# Avoid interaction during build
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies for Chrome and fonts
+# Install dependencies and Google Chrome manually
 RUN apt-get update && apt-get install -y \
     wget \
-    gnupg \
     curl \
     unzip \
+    gnupg \
     fonts-liberation \
     libnss3 \
     libxss1 \
@@ -25,16 +25,17 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     libasound2 \
-    ca-certificates \
-    google-chrome-stable \
-    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-# Download and install Chrome manually
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    apt install -y ./google-chrome-stable_current_amd64.deb && \
-    rm google-chrome-stable_current_amd64.deb
+# Add the Chrome APT repo
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set environment variable for Chrome binary path
+# Set environment variable to point to Chrome
 ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome
 
 # Set working directory
@@ -46,8 +47,8 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port for Flask
+# Expose Flask port
 EXPOSE 5000
 
-# Run the Flask app
+# Run the app
 CMD ["python", "app.py"]
